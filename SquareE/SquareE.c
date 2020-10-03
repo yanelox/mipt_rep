@@ -212,7 +212,6 @@ int EquationSolver (double   a, double   b, double c,
 	else if (!IsZero(a) and disc > 0)
 	{
 		*x1 = (-b + sqrt(disc)) / (2 * a);
-
 		*x2 = (-b - sqrt(disc)) / (2 * a);
 		
 		return 2;
