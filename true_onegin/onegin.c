@@ -70,9 +70,12 @@ void StrSwap        (string* s1, string* s2);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int main()
+void ErrorHandler (int condition, int line_number);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int main ()
 {
-    
     setlocale(LC_ALL, "Rus");
 
     unsigned countStr = 0;
@@ -93,11 +96,11 @@ int main()
 
     FillPMassive (pointers_to_str, file_copy, countStr, countSym);
 
-    qsort(pointers_to_str, countStr, sizeof(string), StrRevCompare); 
+    qsort(pointers_to_str, countStr, sizeof(string), StrCompare); 
 
     //StrQuickSort (pointers_to_str, countStr, StrCompare);
 
-    PrintStr (file_copy, pointers_to_str, countStr);
+    //PrintStr (file_copy, pointers_to_str, countStr);
 
     FromStrToFile (pointers_to_str, sorted_file, countStr);
 }
@@ -106,13 +109,16 @@ int main()
 
 void GetValues (char* file_name, unsigned* countStr, unsigned* countSym)
 {
-    assert (countStr != NULL);
-    assert (countSym != NULL);
-    assert (countSym != countStr);
+    ErrorHandler ((file_name != NULL) ? 1 : 0, __LINE__);
+    ErrorHandler ((countStr != NULL) ? 1 : 0, __LINE__);
+    ErrorHandler ((countSym != NULL) ? 1 : 0, __LINE__);
+    ErrorHandler ((countStr != countSym) ? 1 : 0, __LINE__);
 
     FILE* f = fopen (file_name, "r");
 
-    int c, g;
+    ErrorHandler ((f != NULL) ? 1 : 0, __LINE__);
+
+    int c = 0, g = 0;
 
     *countSym = 0;
     *countStr = 0;
@@ -137,9 +143,15 @@ void GetValues (char* file_name, unsigned* countStr, unsigned* countSym)
 
 void FromFileToStr (char* file_name, char* str, unsigned len)
 {
+    ErrorHandler ((file_name != NULL) ? 1 : 0, __LINE__);
+    ErrorHandler ((str != NULL) ? 1 : 0, __LINE__);
+    ErrorHandler ((file_name != str) ? 1 : 0, __LINE__);
+  
     FILE* f = fopen (file_name, "r");
 
-    fread (str, sizeof(char), len, f);
+    unsigned checker = fread (str, sizeof(char), len, f);
+
+    ErrorHandler ((checker == len) ? 1 : 0, __LINE__);
 
     if ( *(str + len - 1) != '\n')
     {
@@ -154,9 +166,12 @@ void FromFileToStr (char* file_name, char* str, unsigned len)
 
 void FromStrToFile (string* str, char* file_name, unsigned countStr)
 {
-    FILE* f = fopen (file_name, "w");         
+    ErrorHandler ((str != NULL) ? 1 : 0, __LINE__);
+    ErrorHandler ((file_name != NULL) ? 1 : 0, __LINE__);
 
-    assert (f != NULL);
+    FILE* f = fopen (file_name, "w");
+
+    ErrorHandler ((f != NULL) ? 1 : 0, __LINE__);
 
     for (unsigned i = 0; i < countStr; i++)
         for (unsigned j = 0; j < (*(str + i)).len; j++)
@@ -169,6 +184,8 @@ void FromStrToFile (string* str, char* file_name, unsigned countStr)
 
 string init (unsigned length, char* start)
 {
+    ErrorHandler ((start != NULL) ? 1 : 0, __LINE__);
+
     string str;
     
     str.len = length;
@@ -181,6 +198,10 @@ string init (unsigned length, char* start)
 
 void FillPMassive (string* pointers_to_str, char* file_copy, unsigned countStr, unsigned countSym)
 {
+    ErrorHandler ((pointers_to_str != NULL) ? 1 : 0, __LINE__);
+    ErrorHandler ((file_copy != NULL) ? 1 : 0, __LINE__);
+    ErrorHandler ((countStr <= countSym + 1) ? 1 : 0, __LINE__);
+
     int cur_len = 0, j = 0;
     char* cur_p = file_copy;
 
@@ -206,6 +227,9 @@ void FillPMassive (string* pointers_to_str, char* file_copy, unsigned countStr, 
 
 void PrintStr (char* str, string* str1, unsigned countStr)
 {
+    ErrorHandler ((str != NULL) ? 1 : 0, __LINE__);
+    ErrorHandler ((str1 != NULL) ? 1 : 0, __LINE__);
+
     for (unsigned i = 0; i < countStr; i++)
         for (unsigned j = 0; j < (*(str1+i)).len; j++)
             printf ("%c", *((*(str1 + i)).start + j));
@@ -216,7 +240,10 @@ void PrintStr (char* str, string* str1, unsigned countStr)
 int StrCompare (const void* s1, const void* s2)
 {
     string* str1 = (string*) s1;
-    string* str2 = (string*) s2; 
+    string* str2 = (string*) s2;
+
+    ErrorHandler ((s1 != NULL) ? 1 : 0, __LINE__);
+    ErrorHandler ((s2 != NULL) ? 1 : 0, __LINE__);
 
     if ((*str1).len == 1)
         return 1;
@@ -251,17 +278,20 @@ int StrCompare (const void* s1, const void* s2)
 
 int IsLetter (char a)
 {
-    int x = (a >= 'a' and a <= 'z') or (a >= 'A' and a <= 'Z'); //TODO: Сделать русский язык
+    int x = ('a' <= a <= 'z') or ('A' <= a <= 'Z'); //TODO: Сделать русский язык
 
     return x;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int StrRevCompare (const void* s1, const void* s2) //TODO: пофиксить баги с обратным компаратором
+int StrRevCompare (const void* s1, const void* s2) 
 {
     string* str1 = (string*) s1;
     string* str2 = (string*) s2; 
+
+    ErrorHandler ((s1 != NULL) ? 1 : 0, __LINE__);
+    ErrorHandler ((s2 != NULL) ? 1 : 0, __LINE__);
 
     if ((*str1).len == 1)
         return 1;
@@ -295,7 +325,10 @@ int StrRevCompare (const void* s1, const void* s2) //TODO: пофиксить б
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 void StrQuickSort (string* mass, unsigned size, int (* CompareFunc)(const void* el1, const void* el2))
-{
+{   
+    ErrorHandler ((mass != NULL) ? 1 : 0, __LINE__);
+    ErrorHandler ((CompareFunc != NULL) ? 1 : 0, __LINE__);
+
     unsigned first = 0;
     unsigned second = size - 1;
 
@@ -332,10 +365,32 @@ void StrQuickSort (string* mass, unsigned size, int (* CompareFunc)(const void* 
 
 void StrSwap (string* s1, string* s2)
 {
+    ErrorHandler ((s1 != NULL) ? 1 : 0, __LINE__);
+    ErrorHandler ((s2 != NULL) ? 1 : 0, __LINE__);
+
     string swap_tmp = *s1;
     *s1 = *s2;
     *s2 = swap_tmp;
 }
 
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void ErrorHandler (int condition, int line_number)
+{
+    if (line_number > 0)
+    {
+        if (!condition)
+        {
+            printf ("Error in line: %d (please, call developers!!!)\n", line_number);
+            
+            abort();
+        }
+    } 
+    else
+        printf ("Incorrect 'line_number' = %d in func 'ErrorHandler'."\
+                "Some stupid error, check code\n", line_number);
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 //TODO: написать доки
-//TODO: написать ассерты
