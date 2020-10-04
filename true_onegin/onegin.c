@@ -88,7 +88,7 @@ int main ()
 
     char* file_copy = (char*) calloc (countSym + 2, sizeof(char)); 
 
-    assert (file_copy != NULL);
+    assert (file_copy != NULL);                 //TODO: починить ассерты
 
     FromFileToStr (file_for_sort, file_copy, countSym);
 
@@ -383,7 +383,7 @@ void ErrorHandler (int condition, int line_number)
         {
             printf ("Error in line: %d (please, call developers!!!)\n", line_number);
             
-            abort();
+            // TODO: изменить под perror 
         }
     } 
     else

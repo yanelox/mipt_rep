@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
+#include <errno.h>
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -31,11 +32,7 @@
 	@param [out] x2 Second root of equation 
 */
 
-/*!
-	Special value which will be returned by EquationSolver function if equation has infinity count of roots
-*/
-
-#define INFINITY_ROOTS_VALUE 42
+enum equation_solver_return_values {ZERO_ROOTS = 0, ONE_ROOT = 1, TWO_ROOTS = 2, INFINITY_ROOTS = 42, DISC_OUT_OF_RANGE = 97};
 
 /*!
 	Accuracy of comparing values with zero. It is used in IsZero() function
@@ -105,15 +102,6 @@ void Input_Coef (char a[], double* n);
 
 int ChooseMode (void);
 
-/*!
-	Checking definition to true/false and print line_number in "false" case
-
-	@param [in] definition Integet varuable 1 or 0 (use ternary operators to create a definition)
-	@param [in] line_number You should put __LINE__ in any time here
-!*/
-
-void ErrorHandler (int definition, int line_number);
-
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int main ()
@@ -127,7 +115,7 @@ int main ()
 	double x1 = 0;
 	double x2 = 0;
 
-	int countSol = -1;
+	int returned_value = -1;
 
 	int mode = ChooseMode ();	
 
@@ -142,29 +130,29 @@ int main ()
 
 		Input_Coef ("c", &c);
 
-		countSol = EquationSolver ( a, b, c, &x1, &x2);
+		returned_value = EquationSolver ( a, b, c, &x1, &x2);
 
 
-		switch (countSol)
+		switch (returned_value)
 		{
-			case 2:  
+			case TWO_ROOTS:  
 				printf("x1 = %lg\n" "x2 = %lg\n", x1, x2);
 				break;
 
-			case 1: 
+			case ONE_ROOT: 
 				printf("x = %lg", x1);
 				break;
 
-			case 0:  
+			case ZERO_ROOTS:  
 				printf("No real roots");
 				break;
 
-			case INFINITY_ROOTS_VALUE:  
+			case INFINITY_ROOTS:  
 				printf("Any number");
 				break;
 
 			default: 
-				printf("Error: countSol = %d\n", countSol);
+				printf("Error: returned value = %d\n", returned_value);
 				return 1;
 		}
 
@@ -180,14 +168,6 @@ int main ()
 int EquationSolver (double   a, double   b, double c,
                     double* x1, double* x2)
 {
-	assert (isfinite (a));
-	assert (isfinite (b));
-	assert (isfinite (c));
-
-	assert (x1 != NULL);
-	assert (x2 != NULL);
-	assert (x1 != x2);
-
 	if (!IsZero(a))
 	{
 		b /= a;
@@ -197,17 +177,23 @@ int EquationSolver (double   a, double   b, double c,
 	
 	double disc = b * b - 4 * a * c;
 
-	ErrorHandler (isfinite(disc) ? 1 : 0, __LINE__);
+	if (!isfinite(disc))
+	{
+		errno = ERANGE;
+		perror("Error in variable 'disc'");
+
+		return DISC_OUT_OF_RANGE;
+	}
 
 	if ((IsZero(a) and IsZero(b) and !IsZero(c)) or (!IsZero(a) and disc < 0))
-		return 0;
+		return ZERO_ROOTS;
 
 	else if ((IsZero(a) and !IsZero(b)))
 	{
 		*x1 = -c / b;
 		*x2 = -c / b;
 		
-		return 1;
+		return ONE_ROOT;
 	}
 
 	else if (!IsZero(a) and IsZero(disc))
@@ -215,7 +201,7 @@ int EquationSolver (double   a, double   b, double c,
 		*x1 = -b / (2 * a);
 		*x2 = -b / (2 * a);
 
-		return 1;
+		return TWO_ROOTS;
 	}
 	
 	else if (!IsZero(a) and disc > 0)
@@ -223,12 +209,12 @@ int EquationSolver (double   a, double   b, double c,
 		*x1 = (-b + sqrt(disc)) / (2 * a);
 		*x2 = (-b - sqrt(disc)) / (2 * a);
 		
-		return 2;
+		return TWO_ROOTS;
 	}
 	
 	else if (IsZero(a) and IsZero(b) and IsZero(c))
 	{
-		return INFINITY_ROOTS_VALUE;
+		return INFINITY_ROOTS;
 	}
 }
 
@@ -336,15 +322,3 @@ int ChooseMode (void)
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-void ErrorHandler (int definition, int line_number)
-{
-	if (line_number > 0)
-	{
-		if (!definition)
-			printf ("Error in line: %d. Pls, call developers!!\n", line_number);
-	}
-
-	else
-		printf ("Incorrect line number in func ErrorHandler: line_number = %d\n", line_number);
-}
