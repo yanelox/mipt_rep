@@ -152,7 +152,7 @@ int main ()
 				break;
 
 			default: 
-				printf("Error: returned value = %d\n", returned_value);
+				perror("Error message");
 				return 1;
 		}
 
@@ -180,7 +180,6 @@ int EquationSolver (double   a, double   b, double c,
 	if (!isfinite(disc))
 	{
 		errno = ERANGE;
-		perror("Error in variable 'disc'");
 
 		return DISC_OUT_OF_RANGE;
 	}
