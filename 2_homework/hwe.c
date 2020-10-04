@@ -84,5 +84,4 @@ int main ()
 
     fill_sieve (&a);
 
-    printf ("%d", ;
 }
