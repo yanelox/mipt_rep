@@ -105,6 +105,15 @@ void Input_Coef (char a[], double* n);
 
 int ChooseMode (void);
 
+/*!
+	Checking definition to true/false and print line_number in "false" case
+
+	@param [in] definition Integet varuable 1 or 0 (use ternary operators to create a definition)
+	@param [in] line_number You should put __LINE__ in any time here
+!*/
+
+void ErrorHandler (int definition, int line_number);
+
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int main ()
@@ -188,7 +197,7 @@ int EquationSolver (double   a, double   b, double c,
 	
 	double disc = b * b - 4 * a * c;
 
-	assert(isfinite(disc));
+	ErrorHandler (isfinite(disc) ? 1 : 0, __LINE__);
 
 	if ((IsZero(a) and IsZero(b) and !IsZero(c)) or (!IsZero(a) and disc < 0))
 		return 0;
@@ -324,4 +333,18 @@ int ChooseMode (void)
 	}
 
 	return mode;        // mode == 0 => test-mode, mode == 1 => solver-mode
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void ErrorHandler (int definition, int line_number)
+{
+	if (line_number > 0)
+	{
+		if (!definition)
+			printf ("Error in line: %d. Pls, call developers!!\n", line_number);
+	}
+
+	else
+		printf ("Incorrect line number in func ErrorHandler: line_number = %d\n", line_number);
 }

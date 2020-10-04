@@ -11,16 +11,26 @@ struct sieve_t {
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void set_bit (unsigned char* a, int k)
+void set_bit (unsigned char* a, int i)
 {
-    *a = *a | (1u << k);
+    const int K = 6;
+    
+    int byte_number = i / (K * __CHAR_BIT__);
+    int bit_number = (i / K) % __CHAR_BIT__;
+
+    *(a + byte_number) = *(a + byte_number) | (1u << bit_number);
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int get_bit (unsigned char *a, int k)
+int get_bit (unsigned char *a, int i)
 {
-    return (*a >> k) & 1u;
+    const int K = 6;
+    
+    int byte_number = i / (K * __CHAR_BIT__);
+    int bit_number = (i / K) % __CHAR_BIT__;
+
+    return (*(a + byte_number) >> bit_number) & 1u;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -37,28 +47,32 @@ void print_byte (unsigned char a)
 
 void fill_sieve (struct sieve_t* sv)
 {
-    set_bit ((*sv).mod1, 0);
+    const int K = 6;
+    const int mod1_last = __CHAR_BIT__ * K * (*sv).n - 5;
+    const int mod5_last = __CHAR_BIT__ * K * (*sv).n - 1;
 
-    for (int i = 7; i * i <= 48 * (*sv).n - 5; i += 6)                         //по 1
-        if (!get_bit ((*sv).mod1 + (i - 1) / 48, ((i - 1) / 6) % 8))
-            for (int j = i * i; j <= 48 * (*sv).n - 5; j += i)
+    set_bit ((*sv).mod1, 1);
+
+    for (int i = 7; i * i <= mod1_last; i += K)                         //по 1
+        if (!get_bit ((*sv).mod1, i))
+            for (int j = i * i; j <= mod1_last; j += i)
             {
-                if ((j - 1) % 6 == 0)
-                    set_bit ((*sv).mod1 + ((j - 1) / 6) / 8, ((j - 1) / 6) % 8);
+                if ((j - 1) % K == 0)
+                    set_bit ((*sv).mod1, j);
 
-                if ((j - 5) % 6 == 0)
-                    set_bit ((*sv).mod5 + ((j - 5) / 6) / 8, ((j - 5) / 6) % 8);
+                if ((j - 5) % K == 0)
+                    set_bit ((*sv).mod5, j);
             }
 
-    for (int i = 5; i * i <= 48 * (*sv).n - 1; i += 6)                          // 2 по 2
-        if (!get_bit ((*sv).mod5 + ((i - 5) / 6) / 8, ((i - 5) / 6) % 8))
-            for (int j = i * i; j <= 48 * (*sv).n - 1; j += i)
+    for (int i = 5; i * i <= mod5_last; i += K)                          // 2 
+        if (!get_bit ((*sv).mod5, i))
+            for (int j = i * i; j <= mod5_last; j += i)
             {
-                if ((j - 1) % 6 == 0)
-                    set_bit ((*sv).mod1 + ((j - 1) / 6) / 8, ((j - 1) / 6) % 8);
+                if ((j - 1) % K == 0)
+                    set_bit ((*sv).mod1, j);
 
-                if ((j - 5) % 6 == 0)
-                    set_bit ((*sv).mod5 + ((j - 5) / 6) / 8, ((j - 5) / 6) % 8);
+                if ((j - 5) % K == 0)
+                    set_bit ((*sv).mod5, j);
             }
 }
 
@@ -67,10 +81,10 @@ void fill_sieve (struct sieve_t* sv)
 int is_prime (struct sieve_t* sv, unsigned n)
 {
     if ((n - 1) % 6 == 0)
-        return 1 - get_bit ((*sv).mod1 + (n - 1) / 48, ((n - 1) / 6) % 8);
+        return 1 - get_bit ((*sv).mod1, n);
     
     else if ((n - 5) % 6 == 0)
-        return 1 - get_bit ((*sv).mod5 + (n - 5) / 48, ((n - 5) / 6) % 8);
+        return 1 - get_bit ((*sv).mod5, n);
 
     else 
         return 0;
@@ -80,8 +94,14 @@ int is_prime (struct sieve_t* sv, unsigned n)
 
 int main ()
 {
-    struct sieve_t a = {21, calloc(21, sizeof(char)), calloc(21, sizeof(char))};
+    unsigned n = 0;
+
+    scanf ("%u", &n);
+
+    n = (n - n % 6 + 6) / 6;
+    n = n - n % 8 + 8;
+
+    struct sieve_t a = {n, calloc(n, sizeof(char)), calloc(n, sizeof(char))};
 
     fill_sieve (&a);
-
 }
