@@ -32,6 +32,10 @@
 	@param [out] x2 Second root of equation 
 */
 
+/*!
+	Enumeration of values which can be returned by 'EquationSolver' func
+*/
+
 enum equation_solver_return_values {ZERO_ROOTS = 0, ONE_ROOT = 1, TWO_ROOTS = 2, INFINITY_ROOTS = 42, DISC_OUT_OF_RANGE = 97};
 
 /*!
