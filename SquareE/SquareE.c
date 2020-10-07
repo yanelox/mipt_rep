@@ -47,6 +47,7 @@ enum equation_solver_return_values
 	INFINITY_ROOTS = 42, 
 
 	DISC_OUT_OF_RANGE = ERANGE
+};
 
 /*!
 	Accuracy of comparing values with zero. It is used in IsZero() function
