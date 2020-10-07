@@ -18,18 +18,6 @@
 	@brief This programm solves the square equation
 	
 	@version 0.0	
-
-	@param [in] mode Selected work mode
-
-	@param [in] a a - coefficient
-
-	@param [in] b b - coefficient
-	
-	@param [in] c c - coefficient
-
-	@param [out] x1 First root of equation
-	
-	@param [out] x2 Second root of equation 
 */
 
 /*!
@@ -140,12 +128,10 @@ int main ()
 	else if (mode == 1)
 	{
 		Input_Coef ("a", &a);
-	
 		Input_Coef ("b", &b);
-
 		Input_Coef ("c", &c);
 
-		returned_value = EquationSolver ( a, b, c, &x1, &x2);
+		returned_value = EquationSolver (a, b, c, &x1, &x2);
 
 
 		switch (returned_value)
@@ -182,7 +168,7 @@ int main ()
 
 int EquationSolver (double   a, double   b, double c,
                     double* x1, double* x2)
-{
+{ //TODO Fix if a >> b
 	if (!IsZero(a))
 	{
 		b /= a;
@@ -195,7 +181,6 @@ int EquationSolver (double   a, double   b, double c,
 	if (!isfinite(disc))
 	{
 		errno = ERANGE;
-
 		return errno;
 	}
 
@@ -215,7 +200,7 @@ int EquationSolver (double   a, double   b, double c,
 		*x1 = -b / (2 * a);
 		*x2 = -b / (2 * a);
 
-		return TWO_ROOTS;
+		return ONE_ROOT;
 	}
 	
 	else if (!IsZero(a) and disc > 0)
@@ -236,12 +221,12 @@ int EquationSolver (double   a, double   b, double c,
 
 void EquationSolver_test (FILE* fp)
 {
-   	double a = 0;                               //a, b, c coefficients
+   	double a = 0;                               	//a, b, c coefficients
 	double b = 0;
 	double c = 0;
 
-	double true_x1 = 0;                    	    // true_x1, true_x2 - numbers from
-	double true_x2 = 0;    			    // file, true roots for current test
+	double true_x1 = 0;                    	    	// true_x1, true_x2 - numbers from
+	double true_x2 = 0;    			   				// file, true roots for current test
 										// equation
 	double x1 = 0;                              // x1, x2 - calculated roots
 	double x2 = 0;

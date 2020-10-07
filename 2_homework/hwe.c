@@ -37,8 +37,8 @@ int get_bit (unsigned char *a, int i)
 
 void print_byte (unsigned char a)
 {
-    for (int i = 7; i>=0; i--)
-        printf ("%d", get_bit(&a, i));
+    for (int i = 7; i >= 0; i--)
+        printf ("%d", get_bit(&a, 6 * i));
     
     printf ("\n");
 }
@@ -92,10 +92,6 @@ int is_prime (struct sieve_t* sv, unsigned n)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-
-
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
 int main ()
 {
     unsigned n = 0;
@@ -108,4 +104,6 @@ int main ()
     struct sieve_t a = {n, calloc(n, sizeof(char)), calloc(n, sizeof(char))};
 
     fill_sieve (&a);
+
+    print_byte (a.mod5[0]);
 }
