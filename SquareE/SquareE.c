@@ -291,17 +291,17 @@ int IsZero (double a)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void Input_Coef (char a[], double* n)
+void Input_Coef (char coef_name[], double* coef)
 {
-	int k = 0;
+	int correct_inputs = 0;
 
-	printf("Please, input %s (double vlaue):\n", a);
+	printf("Please, input %s (double vlaue):\n", coef_name);
 
-	while (k != 1)
+	while (correct_inputs != 1)
 	{
-		k = scanf ("%lg", n);
+		correct_inputs = scanf ("%lg", coef);
 
-		if (k != 1)
+		if (correct_inputs != 1)
 		{
 			printf ("Incorrect input, please, try again\n");
 
@@ -315,16 +315,16 @@ void Input_Coef (char a[], double* n)
 int ChooseMode (void)
 {
    	int mode = -1;
-    int n = 0;
+    int correct_inputs = 0;
 
 
     printf ("Choose mode: write 0 to test mode or 1 for solver mode:\n");
 
     while (mode != 0 and mode != 1)
 	{
-		n = scanf ("%d", &mode);
+		correct_inputs = scanf ("%d", &mode);
 
-		if ((mode != 0 and mode != 1) or n != 1)
+		if ((mode != 0 and mode != 1) or correct_inputs != 1)
 		{
 				printf("Incorrect mode, please, try again\n");
 		}
