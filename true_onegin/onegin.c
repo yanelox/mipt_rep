@@ -70,7 +70,7 @@ void StrSwap        (string* s1, string* s2);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void ErrorHandler (int condition, int line_number);
+void ErrorHandler (int condition, int line_number); //TODO: убрать/изменить эту штуку
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -324,7 +324,7 @@ int StrRevCompare (const void* s1, const void* s2)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void StrQuickSort (string* mass, unsigned size, int (* CompareFunc)(const void* el1, const void* el2))
+void StrQuickSort (string* mass, unsigned size, int (* CompareFunc)(const void* el1, const void* el2)) //TODO: пофиксить квиксорт
 {   
     ErrorHandler ((mass != NULL) ? 1 : 0, __LINE__);
     ErrorHandler ((CompareFunc != NULL) ? 1 : 0, __LINE__);

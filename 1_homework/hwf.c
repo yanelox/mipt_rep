@@ -7,26 +7,59 @@
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+const int n = 40;
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void fill_f (int* a)
+{
+    int x1 = 1, x2 = 2, tmp = 0;
+
+    a[0] = 1;
+
+    for (int i = 1; i < n; i++)
+    {
+        a[i] = x2;
+
+        tmp = x2;
+        x2 += x1;
+        x1 = tmp;
+    }
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 void set_bit (unsigned char* c, int k, int b)
 {
-    *c = *c & ~(1u << k);
-    *c = *c | (b << k);
+    *(c + k / 8) = *(c + k / 8) & ~(1u << (k % 8));
+    *(c + k / 8) = *(c + k / 8) | (b << (k % 8));
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int get_bit (unsigned char c, int k)
+int get_bit (char* c, int k)
 {
-    return (c >> k) & 1u;
+    return (*(c + k / 8) >> (k % 8)) & 1u;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int next_turn (int total, int possible)
+void to_fb_sys (char* b, int total, int* a)
 {
-    int a[100] = {1};
-    unsigned char b[15] = {0};
-    int x1 = 1, x2 = 2;
+    for (int i = n - 1; i >= 0; i--)
+        if (total >= a[i])
+        {
+            total -= a[i];
+
+            set_bit (b, a[i], 1);
+        }
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int next_turn (int total, int possible, int* a)
+{
+    unsigned char b = callo;
     int i = 0, k = 0;
 
     if (possible >= total)
@@ -34,29 +67,10 @@ int next_turn (int total, int possible)
 
     else 
     {
-        int tmp = 0;
-
-        for (i = 1; x2 <= total; i++)
-        {
-            a[i] = x2;
-
-            tmp = x1;
-            x1 = x2;
-            x2 += tmp;
-            
-            k = i;
-        }
-
-        for (i = k; i>=0; i--)
-            if (total >= a[i])
-            {
-                total -= a[i];
-
-                set_bit (b + i / 8, i % 8, 1);
-            }
+        to_fb_sys (b, total, a);
 
         for (i = 0; i <= k; i++)
-            if (get_bit(b[i/8], i % 8) and a[i] <= possible)
+            if (get_bit(b, i) and a[i] <= possible)
                 return a[i];
 
         return 1;    
@@ -67,5 +81,9 @@ int next_turn (int total, int possible)
 
 int main ()
 {
-    printf ("\n%d", next_turn(10, 9));
+    int a[n];
+
+    fill_f(a);
+
+    printf ("\n%d", next_turn(10, 9, a));
 }

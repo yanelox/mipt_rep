@@ -36,7 +36,17 @@
 	Enumeration of values which can be returned by 'EquationSolver' func
 */
 
-enum equation_solver_return_values {ZERO_ROOTS = 0, ONE_ROOT = 1, TWO_ROOTS = 2, INFINITY_ROOTS = 42, DISC_OUT_OF_RANGE = 97};
+enum equation_solver_return_values 
+{
+	ZERO_ROOTS = 0, 
+	
+	ONE_ROOT = 1, 
+
+	TWO_ROOTS = 2, 
+
+	INFINITY_ROOTS = 42, 
+
+	DISC_OUT_OF_RANGE = ERANGE
 
 /*!
 	Accuracy of comparing values with zero. It is used in IsZero() function
@@ -140,23 +150,23 @@ int main ()
 		switch (returned_value)
 		{
 			case TWO_ROOTS:  
-				printf("x1 = %lg\n" "x2 = %lg\n", x1, x2);
+				printf ("x1 = %lg\n" "x2 = %lg\n", x1, x2);
 				break;
 
 			case ONE_ROOT: 
-				printf("x = %lg", x1);
+				printf ("x = %lg\n", x1);
 				break;
 
 			case ZERO_ROOTS:  
-				printf("No real roots");
+				printf ("No real roots\n");
 				break;
 
 			case INFINITY_ROOTS:  
-				printf("Any number");
+				printf ("Any number\n");
 				break;
 
-			default: 
-				perror("Error message");
+			default:
+				perror("Error message\n");
 				return 1;
 		}
 
@@ -185,7 +195,7 @@ int EquationSolver (double   a, double   b, double c,
 	{
 		errno = ERANGE;
 
-		return DISC_OUT_OF_RANGE;
+		return errno;
 	}
 
 	if ((IsZero(a) and IsZero(b) and !IsZero(c)) or (!IsZero(a) and disc < 0))
@@ -294,7 +304,7 @@ void Input_Coef (char a[], double* n)
 		{
 			printf ("Incorrect input, please, try again\n");
 
-			fflush (stdin);
+			scanf ("%*s");
 		}
 	}
 }
@@ -318,10 +328,12 @@ int ChooseMode (void)
 				printf("Incorrect mode, please, try again\n");
 		}
 
-		fflush (stdin);
+		scanf ("%*s");
 	}
 
 	return mode;        // mode == 0 => test-mode, mode == 1 => solver-mode
 }
+
+
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
