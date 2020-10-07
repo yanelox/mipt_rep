@@ -11,6 +11,38 @@ struct sieve_t {
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+void set_bit (unsigned char* a, int i);
+
+int get_bit (unsigned char *a, int i);
+
+void print_byte (unsigned char a);
+
+void fill_sieve (struct sieve_t* sv);
+
+int is_prime (struct sieve_t* sv, unsigned n);
+
+int naive_alg (int n);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int main ()
+{
+    // unsigned n = 0;
+
+    // scanf ("%u", &n);
+
+    // n = (n - n % 6 + 6) / 6;
+    // n = n - n % 8 + 8;
+
+    // struct sieve_t a = {n, calloc(n, sizeof(char)), calloc(n, sizeof(char))};
+
+    // fill_sieve (&a);
+
+    printf ("%d", naive_alg (10000));
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 void set_bit (unsigned char* a, int i)
 {
     const int K = 6;
@@ -92,18 +124,24 @@ int is_prime (struct sieve_t* sv, unsigned n)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int main ()
+int naive_alg (int n)
 {
-    unsigned n = 0;
+    int k = 0, z = 0;
 
-    scanf ("%u", &n);
+    for (int i = 2; k < n; i++)
+    {
+        z = 0;
 
-    n = (n - n % 6 + 6) / 6;
-    n = n - n % 8 + 8;
+        for (int j = 2; j < i; j++)
+            if (i % j == 0)
+            {
+                z++;
+                break;
+            }
 
-    struct sieve_t a = {n, calloc(n, sizeof(char)), calloc(n, sizeof(char))};
+        if (z)
+            k++;
+    }
 
-    fill_sieve (&a);
-
-    print_byte (a.mod5[0]);
+    return i - 1;
 }
