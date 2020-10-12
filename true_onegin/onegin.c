@@ -10,6 +10,14 @@
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+enum returned_values 
+{
+    ALL_OK = 42,
+    SMTH_WRONG = - 42
+};
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 typedef struct 
 {
     unsigned len;
@@ -20,19 +28,15 @@ string;
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int main            ();
+int GetValues      (char* file_name, unsigned* countStr, unsigned* countSym);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void GetValues      (char* file_name, unsigned* countStr, unsigned* countSym);
+int FromFileToStr  (char* file_name, char* str, unsigned len);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void FromFileToStr  (char* file_name, char* str, unsigned len);
-
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-void FromStrToFile  (string* str, char* file_name, unsigned count);
+int FromStrToFile   (string* str, char* file_name, unsigned count);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -40,12 +44,12 @@ string init         (unsigned length, char* start);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void FillPMassive   (string* pointers_to_str, char* file_copy, 
+int FillPMassive    (string* pointers_to_str, char* file_copy, 
                     unsigned countStr, unsigned countSym);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void PrintStr       (char* str, string* str1, unsigned countStr);
+int PrintStr        (char* str, string* str1, unsigned countStr);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -61,22 +65,18 @@ int StrRevCompare   (const void* s1, const void* s2);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void StrQuickSort   (string* mass, unsigned size, 
+int StrQuickSort    (string* mass, unsigned size, 
                     int ( * CompareFunc ) ( const void *, const void * ));
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void StrSwap        (string* s1, string* s2);
-
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-void ErrorHandler (int condition, int line_number); //TODO: убрать/изменить эту штуку
+int StrSwap         (string* s1, string* s2);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int main ()
 {
-    setlocale(LC_ALL, "Rus");
+    setlocale (LC_ALL, "Rus");
 
     unsigned countStr = 0;
     unsigned countSym = 0;
@@ -84,39 +84,39 @@ int main ()
     char* file_for_sort = "onegin.txt";                 //TODO: сделать названия файлов через параметры main()
     char* sorted_file = "sorted_onegin.txt";
 
-    GetValues(file_for_sort, &countStr, &countSym);
+    int checker = GetValues (file_for_sort, &countStr, &countSym);
+
+    assert (checker == ALL_OK);
 
     char* file_copy = (char*) calloc (countSym + 2, sizeof(char)); 
 
-    assert (file_copy != NULL);                 //TODO: починить ассерты
+    assert (file_copy != NULL);                
 
-    FromFileToStr (file_for_sort, file_copy, countSym);
+    checker = FromFileToStr (file_for_sort, file_copy, countSym);
+
+    assert (checker == ALL_OK);
 
     string pointers_to_str[countStr];
 
-    FillPMassive (pointers_to_str, file_copy, countStr, countSym);
+    checker = FillPMassive (pointers_to_str, file_copy, countStr, countSym);
 
-    qsort(pointers_to_str, countStr, sizeof(string), StrCompare); 
+    assert (checker == ALL_OK);
 
-    //StrQuickSort (pointers_to_str, countStr, StrCompare);
+    qsort (pointers_to_str, countStr, sizeof(string), StrRevCompare);
 
-    //PrintStr (file_copy, pointers_to_str, countStr);
+    checker = FromStrToFile (pointers_to_str, sorted_file, countStr);
 
-    FromStrToFile (pointers_to_str, sorted_file, countStr);
+    assert (checker == ALL_OK);
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void GetValues (char* file_name, unsigned* countStr, unsigned* countSym)
+int GetValues (char* file_name, unsigned* countStr, unsigned* countSym)
 {
-    ErrorHandler ((file_name != NULL) ? 1 : 0, __LINE__);
-    ErrorHandler ((countStr != NULL) ? 1 : 0, __LINE__);
-    ErrorHandler ((countSym != NULL) ? 1 : 0, __LINE__);
-    ErrorHandler ((countStr != countSym) ? 1 : 0, __LINE__);
-
     FILE* f = fopen (file_name, "r");
 
-    ErrorHandler ((f != NULL) ? 1 : 0, __LINE__);
+    if (f == NULL)
+        return SMTH_WRONG;
 
     int c = 0, g = 0;
 
@@ -137,21 +137,23 @@ void GetValues (char* file_name, unsigned* countStr, unsigned* countSym)
         (*countStr)++;
 
     fclose (f);
+
+    return ALL_OK;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void FromFileToStr (char* file_name, char* str, unsigned len)
+int FromFileToStr (char* file_name, char* str, unsigned len)
 {
-    ErrorHandler ((file_name != NULL) ? 1 : 0, __LINE__);
-    ErrorHandler ((str != NULL) ? 1 : 0, __LINE__);
-    ErrorHandler ((file_name != str) ? 1 : 0, __LINE__);
-  
     FILE* f = fopen (file_name, "r");
+
+    if (f == NULL or str == NULL or len < 1)
+        return SMTH_WRONG;
 
     unsigned checker = fread (str, sizeof(char), len, f);
 
-    ErrorHandler ((checker == len) ? 1 : 0, __LINE__);
+    if (checker != len)
+        return SMTH_WRONG;
 
     if ( *(str + len - 1) != '\n')
     {
@@ -160,34 +162,39 @@ void FromFileToStr (char* file_name, char* str, unsigned len)
     }
 
     fclose (f);
+
+    return ALL_OK;
 } 
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void FromStrToFile (string* str, char* file_name, unsigned countStr)
+int FromStrToFile (string* str, char* file_name, unsigned countStr)
 {
-    ErrorHandler ((str != NULL) ? 1 : 0, __LINE__);
-    ErrorHandler ((file_name != NULL) ? 1 : 0, __LINE__);
+    FILE* f = fopen (file_name, "a");
 
-    FILE* f = fopen (file_name, "w");
+    if (f == NULL)
+        return SMTH_WRONG;
 
-    ErrorHandler ((f != NULL) ? 1 : 0, __LINE__);
+    int checker = fseek (f, 0, SEEK_END);
+
+    if (checker != 0)
+        return SMTH_WRONG;
 
     for (unsigned i = 0; i < countStr; i++)
         for (unsigned j = 0; j < (*(str + i)).len; j++)
             fputc ((int) *((*(str + i)).start + j), f);
     
     fclose (f);
+
+    return ALL_OK;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 string init (unsigned length, char* start)
 {
-    ErrorHandler ((start != NULL) ? 1 : 0, __LINE__);
-
     string str;
-    
+
     str.len = length;
     str.start = start;
 
@@ -196,11 +203,10 @@ string init (unsigned length, char* start)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void FillPMassive (string* pointers_to_str, char* file_copy, unsigned countStr, unsigned countSym)
+int FillPMassive (string* pointers_to_str, char* file_copy, unsigned countStr, unsigned countSym)
 {
-    ErrorHandler ((pointers_to_str != NULL) ? 1 : 0, __LINE__);
-    ErrorHandler ((file_copy != NULL) ? 1 : 0, __LINE__);
-    ErrorHandler ((countStr <= countSym + 1) ? 1 : 0, __LINE__);
+    if (file_copy == NULL)
+        return SMTH_WRONG;
 
     int cur_len = 0, j = 0;
     char* cur_p = file_copy;
@@ -219,38 +225,42 @@ void FillPMassive (string* pointers_to_str, char* file_copy, unsigned countStr, 
         j++;
         cur_len++;
 
-        pointers_to_str[i] = init(cur_len, cur_p);        
+        pointers_to_str[i] = init (cur_len, cur_p);        
     }
+
+    return ALL_OK;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void PrintStr (char* str, string* str1, unsigned countStr)
+int PrintStr (char* str, string* str1, unsigned countStr)
 {
-    ErrorHandler ((str != NULL) ? 1 : 0, __LINE__);
-    ErrorHandler ((str1 != NULL) ? 1 : 0, __LINE__);
+    if (str == NULL or str1 == NULL)
+        return SMTH_WRONG;
 
     for (unsigned i = 0; i < countStr; i++)
         for (unsigned j = 0; j < (*(str1+i)).len; j++)
             printf ("%c", *((*(str1 + i)).start + j));
+
+    return ALL_OK;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int StrCompare (const void* s1, const void* s2)
 {
+    if (s1 == NULL or s2 == NULL)
+        return SMTH_WRONG;
+ 
     string* str1 = (string*) s1;
     string* str2 = (string*) s2;
 
-    ErrorHandler ((s1 != NULL) ? 1 : 0, __LINE__);
-    ErrorHandler ((s2 != NULL) ? 1 : 0, __LINE__);
-
     if ((*str1).len == 1)
         return 1;
-    else if ((*str2).len == 1)
+    if ((*str2).len == 1)
         return -1; 
 
-    unsigned i = 0, j = 0;
+    int i = 0, j = 0;
     char cur_sym1 = '0', cur_sym2 = '0';
 
     while (i < (*str1).len and j < (*str2).len)
@@ -258,13 +268,13 @@ int StrCompare (const void* s1, const void* s2)
         cur_sym1 = *((*str1).start + i);
         cur_sym2 = *((*str2).start + j);
 
-        if (IsLetter(cur_sym1) and IsLetter(cur_sym2) and cur_sym1 != cur_sym2)
+        if (IsLetter (cur_sym1) and IsLetter (cur_sym2) and cur_sym1 != cur_sym2)
             return (int) cur_sym1 - (int) cur_sym2;
         
-        else if (IsLetter(cur_sym1) and !IsLetter(cur_sym2))
+        else if (IsLetter (cur_sym1) and !IsLetter (cur_sym2))
             i--;
 
-        else if (!IsLetter(cur_sym1) and IsLetter(cur_sym2))
+        else if (!IsLetter (cur_sym1) and IsLetter (cur_sym2))
             j--;
         
         i++;
@@ -285,34 +295,48 @@ int IsLetter (char a)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int StrRevCompare (const void* s1, const void* s2) 
+int StrRevCompare (const void* s1, const void* s2)  //TODO: починить обратный компаратор
 {
+    if (s1 == NULL or s2 == NULL)
+        return SMTH_WRONG;
+
     string* str1 = (string*) s1;
     string* str2 = (string*) s2; 
 
-    ErrorHandler ((s1 != NULL) ? 1 : 0, __LINE__);
-    ErrorHandler ((s2 != NULL) ? 1 : 0, __LINE__);
-
     if ((*str1).len == 1)
         return 1;
-    else if ((*str2).len == 1)
+    if ((*str2).len == 1)
         return -1; 
 
-    unsigned i = (*str1).len - 1, j = (*str2).len - 1;
-    char cur_sym1 = '0', cur_sym2 = '0';
+    int i = (*str1).len - 1, j = (*str2).len - 1;
+
+    char cur_sym1 = *((*str1).start + i);
+    char cur_sym2 = *((*str2).start + j);
+
+    while (!IsLetter (cur_sym1))
+    {
+        cur_sym1 = *((*str1).start + i);
+        i--;
+    }
+
+    while (!IsLetter (cur_sym2))
+    {
+        cur_sym2 = *((*str2).start + j);
+        j--;
+    }
 
     while (i >= 0 and j >= 0)
     {
-        cur_sym1 = *((*str1).start + i);    
+        cur_sym1 = *((*str1).start + i);
         cur_sym2 = *((*str2).start + j);
 
-        if (IsLetter(cur_sym1) and IsLetter(cur_sym2) and cur_sym1 != cur_sym2)
+        if (IsLetter (cur_sym1) and IsLetter (cur_sym2) and cur_sym1 != cur_sym2)
             return (int) cur_sym1 - (int) cur_sym2;
-        
-        else if (IsLetter(cur_sym1) and !IsLetter(cur_sym2))
+
+        else if (IsLetter (cur_sym1) and !IsLetter (cur_sym2))
             i++;
 
-        else if (!IsLetter(cur_sym1) and IsLetter(cur_sym2))
+        else if (!IsLetter (cur_sym1) and IsLetter (cur_sym2))
             j++;
         
         i--;
@@ -324,71 +348,23 @@ int StrRevCompare (const void* s1, const void* s2)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void StrQuickSort (string* mass, unsigned size, int (* CompareFunc)(const void* el1, const void* el2)) //TODO: пофиксить квиксорт
-{   
-    ErrorHandler ((mass != NULL) ? 1 : 0, __LINE__);
-    ErrorHandler ((CompareFunc != NULL) ? 1 : 0, __LINE__);
-
-    unsigned first = 0;
-    unsigned second = size - 1;
-
-    string mid_el = mass[size / 2];
-    
-    while (first < second)
-    {
-        while ((*CompareFunc) (mass + first, &mid_el) < 0 and first < second)
-            first++;
-
-        while ((*CompareFunc) (mass + second, &mid_el) > 0 and first < second)
-            second--;
-
-        if (first >= second) 
-            break;
-        
-        else
-        {
-            StrSwap (mass + first, mass + second);
-
-            first++;
-            second--;       
-        }
-    }
-
-    if (second > 1)
-        StrQuickSort (mass, second + 1, CompareFunc);
-
-    if (first + 1 < size and first > 0)
-        StrQuickSort (mass + first, size - first, CompareFunc);
+int StrQuickSort (string* mass, unsigned size, int (* CompareFunc)(const void* el1, const void* el2)) //TODO: пофиксить квиксорт
+{
+    ;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void StrSwap (string* s1, string* s2)
+int StrSwap (string* s1, string* s2)
 {
-    ErrorHandler ((s1 != NULL) ? 1 : 0, __LINE__);
-    ErrorHandler ((s2 != NULL) ? 1 : 0, __LINE__);
+    if (s1 == NULL or s2 == NULL)
+        return SMTH_WRONG;
 
     string swap_tmp = *s1;
     *s1 = *s2;
     *s2 = swap_tmp;
-}
 
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-void ErrorHandler (int condition, int line_number)
-{
-    if (line_number > 0)
-    {
-        if (!condition)
-        {
-            printf ("Error in line: %d (please, call developers!!!)\n", line_number);
-            
-            // TODO: изменить под perror 
-        }
-    } 
-    else
-        printf ("Incorrect 'line_number' = %d in func 'ErrorHandler'."\
-                "Some stupid error, check code\n", line_number);
+    return ALL_OK;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

@@ -23,22 +23,17 @@ int is_prime (struct sieve_t* sv, unsigned n);
 
 int naive_alg (int n);
 
+int test_func (int n)
+
+int finding_in_sieve (int n);
+
+int calculate_ones_func (char a)
+
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int main ()
 {
-    // unsigned n = 0;
-
-    // scanf ("%u", &n);
-
-    // n = (n - n % 6 + 6) / 6;
-    // n = n - n % 8 + 8;
-
-    // struct sieve_t a = {n, calloc(n, sizeof(char)), calloc(n, sizeof(char))};
-
-    // fill_sieve (&a);
-
-    printf ("%d", naive_alg (10000));
+    
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -80,31 +75,31 @@ void print_byte (unsigned char a)
 void fill_sieve (struct sieve_t* sv)
 {
     const int K = 6;
-    const int mod1_last = __CHAR_BIT__ * K * (*sv).n - 5;
-    const int mod5_last = __CHAR_BIT__ * K * (*sv).n - 1;
+    const int mod1_last = __CHAR_BIT__ * K * sv->n - 5;
+    const int mod5_last = __CHAR_BIT__ * K * sv->n - 1;
 
-    set_bit ((*sv).mod1, 1);
+    set_bit (sv->mod1, 1);
 
     for (int i = 7; i * i <= mod1_last; i += K)                         //по 1
-        if (!get_bit ((*sv).mod1, i))
+        if (!get_bit (sv->mod1, i))
             for (int j = i * i; j <= mod1_last; j += i)
             {
                 if ((j - 1) % K == 0)
-                    set_bit ((*sv).mod1, j);
+                    set_bit ((sv->mod1, j);
 
                 if ((j - 5) % K == 0)
-                    set_bit ((*sv).mod5, j);
+                    set_bit (sv->mod5, j);
             }
 
     for (int i = 5; i * i <= mod5_last; i += K)                          // 2 
-        if (!get_bit ((*sv).mod5, i))
+        if (!get_bit (sv->mod5, i))
             for (int j = i * i; j <= mod5_last; j += i)
             {
                 if ((j - 1) % K == 0)
-                    set_bit ((*sv).mod1, j);
+                    set_bit (sv->mod1, j);
 
                 if ((j - 5) % K == 0)
-                    set_bit ((*sv).mod5, j);
+                    set_bit (sv->mod5, j);
             }
 }
 
@@ -113,10 +108,10 @@ void fill_sieve (struct sieve_t* sv)
 int is_prime (struct sieve_t* sv, unsigned n)
 {
     if ((n - 1) % 6 == 0)
-        return 1 - get_bit ((*sv).mod1, n);
+        return 1 - get_bit (sv->mod1, n);
     
     else if ((n - 5) % 6 == 0)
-        return 1 - get_bit ((*sv).mod5, n);
+        return 1 - get_bit ((sv->mod5, n);
 
     else 
         return 0;
@@ -126,9 +121,9 @@ int is_prime (struct sieve_t* sv, unsigned n)
 
 int naive_alg (int n)
 {
-    int k = 0, z = 0;
+    int k = 0, z = 0, i = 0;
 
-    for (int i = 2; k < n; i++)
+    for (i = 2; k < n; i++)
     {
         z = 0;
 
@@ -139,9 +134,57 @@ int naive_alg (int n)
                 break;
             }
 
-        if (z)
+        if (!z)
             k++;
     }
 
     return i - 1;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int test_func (int n)
+{
+    n = n / 6;
+    n = n / 8 + 1;
+
+    struct sieve_t a = {n, calloc(n, sizeof(char)), calloc(n, sizeof(char))};
+
+    fill_sieve (&a);
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int finding_in_sieve (int n, struct sieve_t* a)
+{
+    int tmp = 0, i = 0;
+
+    while (tmp < n)
+    {
+        tmp += 16 - calculate_ones_func (a->mod1[i]) - calculate_ones_func (a->mod5[i]);
+
+        i++;
+    }
+
+    i--;
+
+    tmp -= 16 - calculate_ones_func (a->mod1[i]) - calculate_ones_func (a->mod5[i]);
+
+    
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int calculate_ones_func (char a)
+{
+    int c = 0;
+
+    while (a)
+    {
+        c++;
+        
+        a = a & (a - 1);
+    }
+
+    return c;
 }

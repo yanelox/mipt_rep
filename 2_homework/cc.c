@@ -1,56 +1,90 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-struct sieve_t
-{
-    unsigned n;
-    char *s;
-};
+#define or ||
+#define and &&
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-unsigned get_bit (char x, unsigned k)
+int is_prime (unsigned n)
 {
-    return (x >> k) & 1u; 
+    for (int i = 2; i < sqrt(n) + 1; i++)
+        if (n % i == 0)
+            return 0;
+
+    return 1;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void set_bit (char* x, unsigned k)
+int can_be_cs (unsigned n)
 {
-    *x = *x | (1u << k);
-}
-
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-void fill_sieve (struct sieve_t* sv)
-{
-    int i = 2, x, j;
-
-    *((*sv).s) = 1;
-    *((*sv).s + 1) = 1;
-    
-    for (i = 2; i * i <= 8 * (*sv).n; i++)
+    while (n > 0)
     {
-	x = get_bit (*((*sv).s + i / 8), i % 8);
+        if (n % 10 != 1 and n % 10 != 3 and n % 10 != 7 and n % 10 != 9)
+            return 0;
 
-        if (!x)
-            for (j = i * i; j <= 8 * (*sv).n; j += i)
-                set_bit ((*sv).s + j / 8, j % 8);
+        n /= 10;
+    }
+
+    return 1;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int is_cs (unsigned n)
+{
+    int k = 1, c = n, g = n;
+
+    while (c > 0)
+    {
+        k *= 10;
+        c /= 10;
+    }
+
+    k /= 10;
+
+    do
+    {
+        if (!is_prime(g))
+            return 0;
+
+        g = (n % 10) * k + n / 10;
+    }
+
+    while (g != n);
+    
+    return 1;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+unsigned near_cs (unsigned n)
+{
+    int i = 1;
+
+    for (;;)
+    {
+        if (n - i > 0 and is_cs (n - i))
+            return n - i;
+
+        if (is_cs(n + i))
+            return n + i;
+
+        i++;
     }
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int is_prime (struct sieve_t* sv, unsigned n)
-{
-    int x = get_bit (*((*sv).s + n / 8), n % 8);
-    return x;
-}
-
 int main ()
 {
-    ;
+    int n;
+    
+    scanf ("%d", &n);
+
+    printf ("%d", near_cs (n));
 }
