@@ -315,14 +315,14 @@ int StrRevCompare (const void* s1, const void* s2)  //TODO: починить о�
 
     while (!IsLetter (cur_sym1))
     {
-        cur_sym1 = *((*str1).start + i);
         i--;
+        cur_sym1 = *((*str1).start + i);
     }
 
     while (!IsLetter (cur_sym2))
     {
-        cur_sym2 = *((*str2).start + j);
         j--;
+        cur_sym2 = *((*str2).start + j);
     }
 
     while (i >= 0 and j >= 0)
