@@ -60,7 +60,7 @@ int QuickSort (int* mass, unsigned size)
 
         QuickSort (mass, p + 1);
 
-        QuickSort (mass + p + 1, size - p - 1   );
+        QuickSort (mass + p + 1, size - p - 1);
     }
 }
 

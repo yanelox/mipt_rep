@@ -10,13 +10,19 @@
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+/// Enumerate of returned values by fucntion which used to catch errors
+
 enum returned_values 
 {
-    ALL_OK = 42,
-    SMTH_WRONG = - 42
+    ALL_OK = 42,            // All is OK
+    SMTH_WRONG = - 42       // Something not OK
 };
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+/*!
+    \brief  New type string: start - pointer to start of string, len - length of string
+*/
 
 typedef struct 
 {
@@ -28,51 +34,215 @@ string;
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int GetValues      (char* file_name, unsigned* countStr, unsigned* countSym);
+/*!
+    \brief  Function, which coun number of symbols and strings in text (string)
+
+    @param  [in] file_name Pointer to string where is necessary text
+    @param  [in] countStr Pointer to variable where will be written number of strings
+    @param  [in] countSym Pointer to variable where will be written number of symbols
+    
+    @return Returns ALL_OK if there isn't any exeptions and 
+            SMTH_WRONG in all another cases
+*/
+
+int GetValues           (char* file_name, unsigned* countStr, unsigned* countSym);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int FromFileToStr  (char* file_name, char* str, unsigned len);
+/*!
+    \brief  Function which copy text from file with name file_name to str
+
+    @param  [in] file_name Name of file which we want to read
+    @param  [in] str Pointer to string where will be written out text
+    @param  [in] len Maximum number of symbols which we will read
+
+    @return Returns ALL_OK if there isn't any exeptions and 
+            SMTH_WRONG in all another cases
+*/
+
+int FromFileToStr       (char* file_name, char* str, unsigned len);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int FromStrToFile   (string* str, char* file_name, unsigned count);
+/*!
+    \brief  Function which copy text from string to file using type_string massive
+
+    @param  [in] str Pointer to massive with pointers to starts of string (which
+                ends on '\n') in our string. We use this massive to sort our text
+                using function qsort
+    @param  [in] file_name Name of file where we copy our string
+    @param  [in] count Number of symbols which we want to copy
+    @param  [in] mode Parameter which is used in "fopen" fuction
+
+    @return Returns ALL_OK if there isn't any exeptions and 
+            SMTH_WRONG in all another cases
+*/
+
+int FromStrToFile       (string* str, char* file_name, unsigned count, char* mode);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-string init         (unsigned length, char* start);
+/*!
+    \brief  Initialization function for type "string"
+*/
+
+string init             (unsigned length, char* start);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int FillPMassive    (string* pointers_to_str, char* file_copy, 
-                    unsigned countStr, unsigned countSym);
+/*!
+    \brief  Function which fill string massive using "file_copy" text 
+
+    @param  [in] pointers_to_str Pointer to massive with type "string" which
+                we fill 
+    @param  [in] file_copy Text which from we fill "pointers_to_str"
+    @param  [in] countStr Number of strings in our "file_copy"
+    @param  [in] countSym Number of symbols in our "file_copy"
+
+    @return Returns ALL_OK if there isn't any exeptions and 
+            SMTH_WRONG in all another cases
+*/
+
+int FillPMassive        (string* pointers_to_str, char* file_copy, 
+                        unsigned countStr, unsigned countSym);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int PrintStr        (char* str, string* str1, unsigned countStr);
+/*!
+    \brief  Function which print text taking into account string massive which we sort
+
+    @param  [in] str String with text which we want to print
+    @param  [in] str1 Pointer to "string" massive which defines the output order
+    @param  [in] countStr Number of strings in text
+
+    @return Returns ALL_OK if there isn't any exeptions and 
+            SMTH_WRONG in all another cases
+*/
+
+int PrintStr            (char* str, string* str1, unsigned countStr);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int StrCompare      (const void* s1, const void* s2);
+/*!
+    \brief  Function which compare two "string" elements in alhabet order from start 
+            to end
+
+    @param  [in] s1 Pointer to first element 
+    @param  [in] s2 Pointer to second element
+
+    @return Number above zero if s1 should be after s2, below zero if s1 should be
+            before s2, zero if s1 and s2 is same
+
+    @note   There are strange types of input parameters because this function can be used 
+            whith qsort() function
+*/
+
+int StrCompare          (const void* s1, const void* s2);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int IsLetter        (char a);
+/*!
+    \brief  Function which checking a is letter or other symbols
+
+    @param  [in] a Symbol which we want to check
+
+    @return 1 if a is letter and 0 if a isn't letter
+*/
+
+int IsLetter            (char a);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int StrRevCompare   (const void* s1, const void* s2);
+/*!
+    \brief  Function which compare two "string" elements in alphabet order from end to 
+            start 
+
+    @param [in] s1 Pointer to first element 
+    @param [in] s2 Pointer to second element
+
+    @return Number above zero if s1 should be after s2, below zero if s1 should be
+            before s2, zero if s1 and s2 is same
+
+    @note   There are strange types of input parameters because this function can be used 
+            whith qsort() function
+*/
+
+int StrRevCompare       (const void* s1, const void* s2);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int StrQuickSort    (string* mass, unsigned size, 
-                    int ( * CompareFunc ) ( const void *, const void * ));
+/*!
+    \brief  Quick sort realization for string's
+
+    @param  [in] mass Pointer to "string" massive
+    @param  [in] size Size of sorted massive
+    @param  [in] CompareFunc Function which compare two strings
+*/
+
+void StrQuickSort       (string* mass, unsigned size, 
+                        int ( * CompareFunc ) ( const void *, const void * ));
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int StrSwap         (string* s1, string* s2);
+/*!
+    \brief  Function which swap two "string" elements
+
+    @param  [in] s1 Pointer to first element
+    @param  [in] s2 Pointer to second element
+*/
+
+int StrSwap             (string* s1, string* s2);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+/*!
+    \brief  Function which print text to file
+
+    @param  [in] str Pointer tp start of text
+    @param  [in] file_name Name of file wher we want to print
+    @param  [in] mode Parameter which is used in fopen() function
+
+    @return Returns ALL_OK if there isn't any exeptions and 
+            SMTH_WRONG in all another cases
+*/
+
+int OrigStrToFile       (char* str, char* file_name, char* mode);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+/*!
+    \brief  Function which check which letter is less in alphaber order
+
+    @param  [in] a First letter
+    @param  [in] b Second letter 
+
+    @return Value above zero if a is higher, below zero if b is higher, zero if a and
+            b is same letters
+
+    @note   This function was written verify cases with capital letters and lowercase
+            letters (because 'a' and 'A' has different codes in table of codings)
+*/
+
+int TrueDiffBtwLetters  (char a, char b);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+/*!
+    \brief  Function which is used in StrQuickSort
+
+    @param  [in] mass Pointer to sorted massive
+    @param  [in] low First index from we sort
+    @param  [in] high Last element until we sort
+    @param  [in] CompareFunc Function which compare two strings
+
+    @return Number of supporting element
+*/
+
+int Partition           (string* mass, int low, int high, 
+                        int (* CompareFunc)(const void* el1, const void* el2));
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 
 int main ()
 {
@@ -102,10 +272,24 @@ int main ()
 
     assert (checker == ALL_OK);
 
-    qsort (pointers_to_str, countStr, sizeof(string), StrRevCompare);
+    //qsort (pointers_to_str, countStr, sizeof(string), StrCompare);
 
-    checker = FromStrToFile (pointers_to_str, sorted_file, countStr);
+    StrQuickSort (pointers_to_str, countStr, StrCompare);
 
+    checker = FromStrToFile (pointers_to_str, sorted_file, countStr, "w");
+
+    assert (checker == ALL_OK);
+
+    ///qsort (pointers_to_str, countStr, sizeof(string), StrRevCompare);
+
+    StrQuickSort (pointers_to_str, countStr, StrRevCompare);
+
+    checker = FromStrToFile (pointers_to_str, sorted_file, countStr, "a");
+
+    assert (checker == ALL_OK);
+
+    checker = OrigStrToFile (file_copy, sorted_file, "a");
+    
     assert (checker == ALL_OK);
 }
 
@@ -168,9 +352,9 @@ int FromFileToStr (char* file_name, char* str, unsigned len)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int FromStrToFile (string* str, char* file_name, unsigned countStr)
+int FromStrToFile (string* str, char* file_name, unsigned countStr, char* mode)
 {
-    FILE* f = fopen (file_name, "a");
+    FILE* f = fopen (file_name, mode);
 
     if (f == NULL)
         return SMTH_WRONG;
@@ -181,9 +365,12 @@ int FromStrToFile (string* str, char* file_name, unsigned countStr)
         return SMTH_WRONG;
 
     for (unsigned i = 0; i < countStr; i++)
-        for (unsigned j = 0; j < (*(str + i)).len; j++)
-            fputc ((int) *((*(str + i)).start + j), f);
+        if ((*(str + i)).len > 2)
+            for (unsigned j = 0; j < (*(str + i)).len; j++)
+                fputc ((int) *((*(str + i)).start + j), f);
     
+    fprintf (f, "\n");
+
     fclose (f);
 
     return ALL_OK;
@@ -269,7 +456,7 @@ int StrCompare (const void* s1, const void* s2)
         cur_sym2 = *((*str2).start + j);
 
         if (IsLetter (cur_sym1) and IsLetter (cur_sym2) and cur_sym1 != cur_sym2)
-            return (int) cur_sym1 - (int) cur_sym2;
+            return TrueDiffBtwLetters (cur_sym1, cur_sym2);
         
         else if (IsLetter (cur_sym1) and !IsLetter (cur_sym2))
             i--;
@@ -287,15 +474,13 @@ int StrCompare (const void* s1, const void* s2)
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int IsLetter (char a)
-{
-    int x = ('a' <= a <= 'z') or ('A' <= a <= 'Z'); //TODO: Сделать русский язык
-
-    return x;
+{ //TODO: Сделать русский язык
+    return (('a' <= a) and (a <= 'z')) or (('A' <= a) and (a <= 'Z'));;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int StrRevCompare (const void* s1, const void* s2)  //TODO: починить обратный компаратор
+int StrRevCompare (const void* s1, const void* s2)  
 {
     if (s1 == NULL or s2 == NULL)
         return SMTH_WRONG;
@@ -331,7 +516,7 @@ int StrRevCompare (const void* s1, const void* s2)  //TODO: починить о�
         cur_sym2 = *((*str2).start + j);
 
         if (IsLetter (cur_sym1) and IsLetter (cur_sym2) and cur_sym1 != cur_sym2)
-            return (int) cur_sym1 - (int) cur_sym2;
+            return TrueDiffBtwLetters (cur_sym1, cur_sym2);
 
         else if (IsLetter (cur_sym1) and !IsLetter (cur_sym2))
             i++;
@@ -348,9 +533,22 @@ int StrRevCompare (const void* s1, const void* s2)  //TODO: починить о�
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int StrQuickSort (string* mass, unsigned size, int (* CompareFunc)(const void* el1, const void* el2)) //TODO: пофиксить квиксорт
+void StrQuickSort (string* mass, unsigned size, int (* CompareFunc)(const void* el1, const void* el2)) //TODO: пофиксить квиксорт
 {
-    ;
+    int left = 0;
+    int right = size - 1;
+
+    if (right < 0)
+        return;
+    
+    if (left < right)
+    {
+        int p = Partition (mass, left, right, CompareFunc);
+
+        StrQuickSort (mass, p + 1, CompareFunc);
+
+        StrQuickSort (mass + p + 1, size - p - 1, CompareFunc);
+    }
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -369,4 +567,62 @@ int StrSwap (string* s1, string* s2)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-//TODO: написать доки
+int OrigStrToFile (char* str, char* file_name, char* mode)
+{
+    FILE* f = fopen (file_name, mode);
+
+    if (f == NULL)
+        return SMTH_WRONG;
+
+    fprintf (f, "%s", str);
+
+    fprintf (f, "\n");
+
+    fclose (f);
+
+    return ALL_OK;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int TrueDiffBtwLetters (char a, char b)
+{
+    if ((a >= 'A') and (a <= 'Z'))
+        a += 'a' - 'A';
+
+    if ((b >= 'A') and (b <= 'Z'))
+        b += 'a' - 'A';
+
+    return a - b;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int Partition (string* mass, int low, int high, int (* CompareFunc)(const void* el1, const void* el2))
+{
+    string sup_el = mass[(low + high) / 2];
+
+    int left = low - 1;
+    int right = high + 1;
+
+    for (;;)
+    {
+        do
+            left++;
+        while (CompareFunc ((const void*) mass + left, (const void*) &sup_el) < 0);
+
+        do
+            right--;
+        while (CompareFunc ((const void*) mass + right, (const void*) &sup_el) > 0);
+        
+        if (left >= right)
+            return right;
+
+        StrSwap (mass + left, mass + right);
+
+        left++;
+        right--;
+    }
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

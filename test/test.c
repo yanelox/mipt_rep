@@ -6,6 +6,9 @@
 #include <time.h>
 #include <locale.h>
 
+#define or ||
+#define and &&
+
 //-----------------------------------------------------------------------------
 
 #define swap(t, x, y) t c = x; x = y; y = c;
@@ -414,5 +417,9 @@
 
 int main()
 {
-    do
+    char a[] = {"123abf\n546ng"};
+
+    for (int i = 0; i < 12; i++)
+        if ((('a' <= a[i]) and (a[i] <= 'z')) or (('A' <= a[i])  and (a[i] <= 'Z')))
+            printf ("%c ", a[i]);
 }	
