@@ -177,6 +177,8 @@ int StrRevCompare       (const void* s1, const void* s2);
     @param  [in] mass Pointer to "string" massive
     @param  [in] size Size of sorted massive
     @param  [in] CompareFunc Function which compare two strings
+
+    @note   It doesn't work, don't use it
 */
 
 void StrQuickSort       (string* mass, unsigned size, 
@@ -244,15 +246,15 @@ int Partition           (string* mass, int low, int high,
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
-int main ()
+int main (int argv, char* argc[])
 {
     setlocale (LC_ALL, "Rus");
 
     unsigned countStr = 0;
     unsigned countSym = 0;
 
-    char* file_for_sort = "onegin.txt";                 //TODO: сделать названия файлов через параметры main()
-    char* sorted_file = "sorted_onegin.txt";
+    char* file_for_sort = argc[1];                 
+    char* sorted_file = argc[2];
 
     int checker = GetValues (file_for_sort, &countStr, &countSym);
 
@@ -272,17 +274,13 @@ int main ()
 
     assert (checker == ALL_OK);
 
-    //qsort (pointers_to_str, countStr, sizeof(string), StrCompare);
-
-    StrQuickSort (pointers_to_str, countStr, StrCompare);
+    qsort (pointers_to_str, countStr, sizeof(string), StrCompare);
 
     checker = FromStrToFile (pointers_to_str, sorted_file, countStr, "w");
 
     assert (checker == ALL_OK);
 
-    ///qsort (pointers_to_str, countStr, sizeof(string), StrRevCompare);
-
-    StrQuickSort (pointers_to_str, countStr, StrRevCompare);
+    qsort (pointers_to_str, countStr, sizeof(string), StrRevCompare);
 
     checker = FromStrToFile (pointers_to_str, sorted_file, countStr, "a");
 
@@ -474,7 +472,7 @@ int StrCompare (const void* s1, const void* s2)
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int IsLetter (char a)
-{ //TODO: Сделать русский язык
+{ 
     return (('a' <= a) and (a <= 'z')) or (('A' <= a) and (a <= 'Z'));;
 }
 
@@ -533,7 +531,7 @@ int StrRevCompare (const void* s1, const void* s2)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void StrQuickSort (string* mass, unsigned size, int (* CompareFunc)(const void* el1, const void* el2)) //TODO: пофиксить квиксорт
+void StrQuickSort (string* mass, unsigned size, int (* CompareFunc)(const void* el1, const void* el2)) //QuickSort не работает не юзать !!!!!!!!!!!
 {
     int left = 0;
     int right = size - 1;
