@@ -26,7 +26,7 @@ void fill_f (int* a)
 
     a[0] = 1;
 
-    for (int i = 1; i < n; i++) 
+    for (int i = 1; i < n; i++)
     {
         a[i] = x2;
 
@@ -137,5 +137,5 @@ int main ()
             count_loses++;
     }
 
-    printf ("%d\n", count_loses);   
+    printf ("%d\n", count_loses);
 }
