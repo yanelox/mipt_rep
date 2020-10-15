@@ -244,7 +244,7 @@ int Partition           (string* mass, int low, int high,
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
-int main ()
+int main (int argv, char* argc[])
 {
     setlocale (LC_ALL, "Rus");
 
@@ -272,17 +272,13 @@ int main ()
 
     assert (checker == ALL_OK);
 
-    //qsort (pointers_to_str, countStr, sizeof(string), StrCompare);
-
-    StrQuickSort (pointers_to_str, countStr, StrCompare);
+    qsort (pointers_to_str, countStr, sizeof(string), StrCompare);
 
     checker = FromStrToFile (pointers_to_str, sorted_file, countStr, "w");
 
     assert (checker == ALL_OK);
 
-    ///qsort (pointers_to_str, countStr, sizeof(string), StrRevCompare);
-
-    StrQuickSort (pointers_to_str, countStr, StrRevCompare);
+    qsort (pointers_to_str, countStr, sizeof(string), StrRevCompare);
 
     checker = FromStrToFile (pointers_to_str, sorted_file, countStr, "a");
 
