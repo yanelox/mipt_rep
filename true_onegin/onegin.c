@@ -248,8 +248,6 @@ int Partition           (string* mass, int low, int high,
 
 int main (int argv, char* argc[])
 {
-    setlocale (LC_ALL, "Rus");
-
     unsigned countStr = 0;
     unsigned countSym = 0;
 
