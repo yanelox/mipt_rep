@@ -415,11 +415,21 @@
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int main()
-{
-    char a[] = {"123abf\n546ng"};
+int y = 0;
 
-    for (int i = 0; i < 12; i++)
-        if ((('a' <= a[i]) and (a[i] <= 'z')) or (('A' <= a[i])  and (a[i] <= 'Z')))
-            printf ("%c ", a[i]);
+void f (void)
+{
+    int* a;
+
+    for (;;)
+    {
+        a = calloc (1024 * 1024, sizeof(int));
+        y++;
+        printf ("%d\n", y); 
+    }
+}
+
+int main()
+{   
+    f();
 }	
