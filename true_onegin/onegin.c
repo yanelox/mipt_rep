@@ -26,7 +26,7 @@ enum returned_values
 
 typedef struct 
 {
-    unsigned len;
+    unsigned len; //size_t
 
     char* start;
 }
@@ -35,7 +35,7 @@ string;
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 /*!
-    \brief  Function, which coun number of symbols and strings in text (string)
+    \brief  Function, which count number of symbols and strings in text (string)
 
     @param  [in] file_name Pointer to string where is necessary text
     @param  [in] countStr Pointer to variable where will be written number of strings
@@ -44,8 +44,8 @@ string;
     @return Returns ALL_OK if there isn't any exeptions and 
             SMTH_WRONG in all another cases
 */
-
-int GetValues           (char* file_name, unsigned* countStr, unsigned* countSym);
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+int FileSizeInfo           (char* file_name, unsigned* countStr, unsigned* countSym);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -141,7 +141,7 @@ int StrCompare          (const void* s1, const void* s2);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-/*!
+/*! //TODO delete
     \brief  Function which checking a is letter or other symbols
 
     @param  [in] a Symbol which we want to check
@@ -179,6 +179,7 @@ int StrRevCompare       (const void* s1, const void* s2);
     @param  [in] CompareFunc Function which compare two strings
 
     @note   It doesn't work, don't use it
+    //TODO run with Valgrind and FLAGS
 */
 
 void StrQuickSort       (string* mass, unsigned size, 
@@ -224,7 +225,7 @@ int OrigStrToFile       (char* str, char* file_name, char* mode);
     @note   This function was written verify cases with capital letters and lowercase
             letters (because 'a' and 'A' has different codes in table of codings)
 */
-
+// letters_cmp
 int TrueDiffBtwLetters  (char a, char b);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -238,54 +239,54 @@ int TrueDiffBtwLetters  (char a, char b);
     @param  [in] CompareFunc Function which compare two strings
 
     @return Number of supporting element
+
+    @note It doesn't work, don't use it
 */
 
-int Partition           (string* mass, int low, int high, 
+int QPartition          (string* mass, int low, int high, 
                         int (* CompareFunc)(const void* el1, const void* el2));
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
 int main (int argv, char* argc[])
-{
+{   
+    assert (argv >= 2);
+
     unsigned countStr = 0;
     unsigned countSym = 0;
 
-    char* file_for_sort = argc[1];                 
-    char* sorted_file = argc[2];
+    char* file_for_sort = argc[1];            
+    char* sorted_file   = argc[2];
 
-    int checker = GetValues (file_for_sort, &countStr, &countSym);
+    Check( GetValues (file_for_sort, &countStr, &countSym) );
+    Check(exit_code);
 
-    assert (checker == ALL_OK);
+    //assert (checker == ALL_OK);
 
     char* file_copy = (char*) calloc (countSym + 2, sizeof(char)); 
 
     assert (file_copy != NULL);                
 
     checker = FromFileToStr (file_for_sort, file_copy, countSym);
-
     assert (checker == ALL_OK);
 
-    string pointers_to_str[countStr];
+    string pointers_to_str[countStr]; //Do not work
 
     checker = FillPMassive (pointers_to_str, file_copy, countStr, countSym);
-
     assert (checker == ALL_OK);
 
     qsort (pointers_to_str, countStr, sizeof(string), StrCompare);
 
     checker = FromStrToFile (pointers_to_str, sorted_file, countStr, "w");
-
     assert (checker == ALL_OK);
 
     qsort (pointers_to_str, countStr, sizeof(string), StrRevCompare);
 
     checker = FromStrToFile (pointers_to_str, sorted_file, countStr, "a");
-
     assert (checker == ALL_OK);
 
     checker = OrigStrToFile (file_copy, sorted_file, "a");
-    
     assert (checker == ALL_OK);
 }
 
@@ -293,27 +294,34 @@ int main (int argv, char* argc[])
 
 int GetValues (char* file_name, unsigned* countStr, unsigned* countSym)
 {
+    assert(file_name);
+    a
+    a
+
     FILE* f = fopen (file_name, "r");
-
-    if (f == NULL)
+    //access F_OK
+    if (f == NULL and countStr != 0 and countSym != 0)
         return SMTH_WRONG;
+    //TODO OpenFile
 
-    int c = 0, g = 0;
+    int cur_sym = 0, last_sym = 0;
 
     *countSym = 0;
     *countStr = 0;
 
-    while((c = fgetc (f)) != EOF)
+    //TODO fread
+    //TODO How to get file size c (fseek)
+    while((cur_sym = fgetc (f)) != EOF)
     {
         (*countSym)++;
 
-        if (c == '\n')
+        if (cur_sym == '\n')
             (*countStr)++;
 
-        g = c;
+        last_sym = cur_sym;
     }
 
-    if (g != '\n')
+    if (last_sym != '\n')
         (*countStr)++;
 
     fclose (f);
@@ -335,6 +343,7 @@ int FromFileToStr (char* file_name, char* str, unsigned len)
     if (checker != len)
         return SMTH_WRONG;
 
+    // comment
     if ( *(str + len - 1) != '\n')
     {
          *(str + len) = '\n';
@@ -360,14 +369,14 @@ int FromStrToFile (string* str, char* file_name, unsigned countStr, char* mode)
     if (checker != 0)
         return SMTH_WRONG;
 
-    for (unsigned i = 0; i < countStr; i++)
-        if ((*(str + i)).len > 2)
-            for (unsigned j = 0; j < (*(str + i)).len; j++)
-                fputc ((int) *((*(str + i)).start + j), f);
+    for (unsigned i = 0; i < countStr; ++i)
+        if ((*(str + i)).len > 2) //Commemt
+            for (unsigned j = 0; j < (str[i].len; j++)
+                fputc ((int) str[i].start[j], f);
     
-    fprintf (f, "\n");
+    fprintf (f, "\n"); //fputc
 
-    fclose (f);
+    fclose (f); // TODO function
 
     return ALL_OK;
 }
@@ -378,7 +387,7 @@ string init (unsigned length, char* start)
 {
     string str;
 
-    str.len = length;
+    str.len   = length;
     str.start = start;
 
     return str;
@@ -388,13 +397,14 @@ string init (unsigned length, char* start)
 
 int FillPMassive (string* pointers_to_str, char* file_copy, unsigned countStr, unsigned countSym)
 {
-    if (file_copy == NULL)
+    asert()!!!!!!!!!
+    if (file_copy == NULL or pointers_to_str == NULL)
         return SMTH_WRONG;
-
-    int cur_len = 0, j = 0;
+    //TODO ADD ALL WARINGS AND FIX THEM
+    int cur_len = 0;
     char* cur_p = file_copy;
 
-    for (int i = 0; i < countStr; i++)
+    for (i = 0; i < countStr; i++)
     {
         cur_p = file_copy + j;
         cur_len = 0;
@@ -408,7 +418,7 @@ int FillPMassive (string* pointers_to_str, char* file_copy, unsigned countStr, u
         j++;
         cur_len++;
 
-        pointers_to_str[i] = init (cur_len, cur_p);        
+        pointers_to_str[i] = //new_string (cur_len, cur_p);        
     }
 
     return ALL_OK;
@@ -423,7 +433,7 @@ int PrintStr (char* str, string* str1, unsigned countStr)
 
     for (unsigned i = 0; i < countStr; i++)
         for (unsigned j = 0; j < (*(str1+i)).len; j++)
-            printf ("%c", *((*(str1 + i)).start + j));
+            printf ("%c", *((*(str1 + i)).start + j)); //[][]           *(str + i) ======= i]
 
     return ALL_OK;
 }
@@ -454,7 +464,7 @@ int StrCompare (const void* s1, const void* s2)
         if (IsLetter (cur_sym1) and IsLetter (cur_sym2) and cur_sym1 != cur_sym2)
             return TrueDiffBtwLetters (cur_sym1, cur_sym2);
         
-        else if (IsLetter (cur_sym1) and !IsLetter (cur_sym2))
+        else if (isalpha() (cur_sym1) and !IsLetter (cur_sym2))
             i--;
 
         else if (!IsLetter (cur_sym1) and IsLetter (cur_sym2))
@@ -551,9 +561,6 @@ void StrQuickSort (string* mass, unsigned size, int (* CompareFunc)(const void* 
 
 int StrSwap (string* s1, string* s2)
 {
-    if (s1 == NULL or s2 == NULL)
-        return SMTH_WRONG;
-
     string swap_tmp = *s1;
     *s1 = *s2;
     *s2 = swap_tmp;
@@ -583,6 +590,7 @@ int OrigStrToFile (char* str, char* file_name, char* mode)
 
 int TrueDiffBtwLetters (char a, char b)
 {
+    //tolower!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if ((a >= 'A') and (a <= 'Z'))
         a += 'a' - 'A';
 
@@ -594,7 +602,7 @@ int TrueDiffBtwLetters (char a, char b)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int Partition (string* mass, int low, int high, int (* CompareFunc)(const void* el1, const void* el2))
+int Partition (string* mass, int low, int high, int (* CompareFunc)(const void* el1, const void* el2)) //не работает, не юзать!!!!!!!
 {
     string sup_el = mass[(low + high) / 2];
 
