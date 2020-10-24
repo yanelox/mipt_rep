@@ -44,7 +44,7 @@ string;
     @return Returns ALL_OK if there isn't any exeptions and 
             SMTH_WRONG in all another cases
 */
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 int FileSizeInfo           (char* file_name, unsigned* countStr, unsigned* countSym);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
