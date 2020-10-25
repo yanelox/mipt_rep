@@ -4,11 +4,6 @@
 #include <math.h>
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-#define and &&
-#define or ||
-
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 /*!
     \brief  Posion. If element have this value, it is incorrect. Macto POISON_EXIST 
             talking about existing POISON for this type of stack
@@ -269,7 +264,7 @@ void StackPop (Stack* stack, stack_type* returned_value_p)
 
     stack_type returned_value = *(stack->start + stack->size - 1);
 
-    StackDecrease (*stack);
+    StackDecrease (stack);
 
     *(stack->start + stack->size - 1) = '\0';
 

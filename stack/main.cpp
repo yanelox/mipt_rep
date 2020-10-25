@@ -1,4 +1,4 @@
-#include "stack.c"
+#include "stack.cpp"
 
 int main ()
 {
