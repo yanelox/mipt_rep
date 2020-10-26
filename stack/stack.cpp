@@ -19,7 +19,7 @@ double POISON = NAN;
 #ifdef POISON_EXIST
 #define HARD_CHECK_FOR_POISON(el) assert ((el) != POISON);
 #else 
-#define HARD_CHECK_FOR_POISON(el)
+#define HARD_CHECK_FOR_POISON(el) ;
 #endif
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -103,7 +103,9 @@ enum FunctionNumbers
     \brief Stack-type
 */
 typedef char stack_type;
+#define STACK_PRINT_TYPE "%c"
 
+printf("fddfdf " STACK_PRINT_TYPE "DFDF\n")
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 /*!
     \brief Variable which control incorrect changes in stack
@@ -253,7 +255,7 @@ void StackPush (Stack* stack, stack_type new_el)
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
+//TODO return stack_type
 void StackPop (Stack* stack, stack_type* returned_value_p)
 {
     assert (returned_value_p != NULL);
@@ -266,7 +268,7 @@ void StackPop (Stack* stack, stack_type* returned_value_p)
 
     StackDecrease (stack);
 
-    *(stack->start + stack->size - 1) = '\0';
+    *(stack->start + stack->size - 1) = 0;
 
     stack->size -= 1;
 
