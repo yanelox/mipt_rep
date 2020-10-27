@@ -116,32 +116,20 @@ Poly KaratsubaAlg (Poly poly1, Poly poly2)
 
     A0B0 = KaratsubaAlg (x, y);
 
-    free (x.p);
-    free (y.p);
-
     x = GetSecondPart (poly1);
     y = GetSecondPart (poly2);
 
     A1B1 = KaratsubaAlg (x, y);
-
-    free (x.p);
-    free (y.p);
 
     x = GetFirstPart (poly1);
     y = GetSecondPart (poly1);
 
     A10 = sum_poly (x, y, 1);
 
-    free (x.p);
-    free (y.p);
-
     x = GetFirstPart (poly2);
     y = GetSecondPart (poly2);
 
     B10 = sum_poly (x, y, 1);
-
-    free (x.p);
-    free (y.p);
 
     AB = KaratsubaAlg (A10, B10);
 
@@ -171,10 +159,9 @@ Poly GetFirstPart (Poly poly)
 {
     unsigned half_size = poly.n / 2;
 
-    Poly res = {half_size, (int*) calloc (half_size, sizeof (int))};
+    Poly res = poly;
 
-    for (unsigned i = 0; i < half_size; i++)
-        res.p[i] = poly.p[i];
+    res.n = half_size;
 
     return res;
 }
@@ -183,12 +170,12 @@ Poly GetFirstPart (Poly poly)
 
 Poly GetSecondPart (Poly poly)
 {
-    unsigned half_size = poly.n - poly.n / 2;
+    unsigned half_size = poly.n / 2;
 
-    Poly res = {half_size, (int*) calloc (half_size, sizeof (int))};
+    Poly res = poly;
 
-    for (unsigned i = 0; i < half_size; i++)
-        res.p[i] = poly.p[i + poly.n / 2];   
+    res.p += half_size;
+    res.n = half_size;   
 
     return res;
 }
