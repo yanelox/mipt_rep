@@ -5,6 +5,13 @@
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 /*!
+    \brief Stack-type
+*/
+typedef char stack_type;
+#define STACK_PRINT_TYPE "%c"
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+/*!
     \brief  Posion. If element have this value, it is incorrect. Macto POISON_EXIST 
             talking about existing POISON for this type of stack
 */
@@ -59,55 +66,6 @@ enum FunctionNumbers
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 /*!
-    \brief Macro which print all info about stack
-
-    @param [in] stack Stack-type variable, which info we want to print about
-*/
-
-#define StackDump(stack) \
-{                                                   \
-    int check = StackValidity (stack, DUMP_CODE);   \
-                                                    \
-    if (check == 1)                                 \
-        printf ("Stack[OK]: " #stack " ");          \
-    else                                            \
-        printf ("Stack[WRONG][CODE: %d]:            \
-        " #stack " ", exit_code);                   \
-                                                    \
-    printf ("[%p]\n{\n", stack.start);              \
-                                                    \
-    printf ("size = %lu \n", stack.size);           \
-                                                    \
-    printf ("capacity = %lu\n", stack.capacity);    \
-                                                    \
-    printf ("hash_sum = %llX\n", stack.hash);       \
-                                                    \
-    printf ("   {\n");                              \
-                                                    \
-    for (size_t i = 0; i < stack.capacity; i++)     \
-    {                                               \
-        printf ("   ");                             \
-        if (i < stack.size)                         \
-            printf  ("*");                          \
-        else                                        \
-            printf (" ");                           \
-        printf  ("[%lu] = %c\n", i,                 \
-                *(stack.start + i));                \
-    }                                               \
-                                                    \
-    printf ("   }\n}\n");                           \
-}
-
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-/*!
-    \brief Stack-type
-*/
-typedef char stack_type;
-#define STACK_PRINT_TYPE "%c"
-
-printf("fddfdf " STACK_PRINT_TYPE "DFDF\n")
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-/*!
     \brief Variable which control incorrect changes in stack
 */
 typedef unsigned long long hummingbird_type;
@@ -159,10 +117,11 @@ void StackPush              (Stack* stack, stack_type new_el);
 /*!
     \brief Fucntion which take last element from stack
 
-    @param [in] stack               Pointer to stack where from we want to take element
-    @param [in] returned_value_p    Pointer to value where we want to write value from stack
+    @param [in] stack   Pointer to stack where from we want to take element
+
+    @return             Returns taken from stack element
 */
-void StackPop               (Stack* stack, stack_type* returned_value_p);
+stack_type StackPop         (Stack* stack);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 /*!
@@ -203,9 +162,36 @@ int StackDecrease           (Stack* stack);
 
     @param [in] stack   Stack which hash_sum of buffer we want to caclulate
 
-    @return      Calculated value of hash_sum
+    @return             Calculated value of hash_sum
 */
 unsigned long long HashSum  (Stack stack);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+/*!
+    \brief Function which print all necessary info about stack
+
+    @param [in] stack       Stack which info you want print about
+    @param [in] func_name   Name of function where we called StackDumpF()
+    @param [in] line_number Line number where was called StackDumpF()
+    @param [in] file_name   Name of file whre was called StackDumpF()
+    @param [in] stack_name  String which contents real name of stack variable
+
+    @note There is StackDump macro below for more simple using  
+*/
+void StackDumpF             (Stack stack, const char* func_name, int line_number, 
+                            const char* file_name, const char* stack_name);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+/*!
+    \brief  Macro which called StackDumpF() but automatically paste parametres func_name,
+            line_number, file_name, stack_name using system macros
+*/
+#define StackDump(stack) StackDumpF (stack, __PRETTY_FUNCTION__, __LINE__, \
+                                    __FILE__, #stack);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void UnitTest               ();
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -255,14 +241,13 @@ void StackPush (Stack* stack, stack_type new_el)
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-//TODO return stack_type
-void StackPop (Stack* stack, stack_type* returned_value_p)
+
+stack_type StackPop (Stack* stack)
 {
-    assert (returned_value_p != NULL);
     assert (stack != NULL);
 
     if (!StackValidity (*stack, POP_CODE))
-        return;
+        return -1;
 
     stack_type returned_value = *(stack->start + stack->size - 1);
 
@@ -272,11 +257,9 @@ void StackPop (Stack* stack, stack_type* returned_value_p)
 
     stack->size -= 1;
 
-    *returned_value_p = returned_value;
-
     stack->hash = HashSum (*stack);
 
-    return;
+    return returned_value;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -475,4 +458,72 @@ void PrintExitCode ()
     }
 
     return;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void StackDumpF (Stack stack, const char* func_name, int line_number, const char* file_name, const char* stack_name)
+{                                                   
+    int check = StackValidity (stack, DUMP_CODE);   
+                                                    
+    if (check == 1)                                 
+        printf ("Stack[OK]: ");          
+    else                                           
+        printf ("Stack[WRONG][CODE: %d]: ", exit_code);                  
+                                                    
+    printf ("[%p] ", stack.start);
+
+    printf ("\"%s\" %s line %d %s", stack_name, func_name, line_number, file_name);
+
+    printf ("\n{\n");              
+                                                
+    printf ("size = %lu \n", stack.size);           
+                                                    
+    printf ("capacity = %lu\n", stack.capacity);    
+                                                    
+    printf ("hash_sum = %llX\n", stack.hash);       
+                                                    
+    printf ("   {\n");                              
+                                                    
+    for (size_t i = 0; i < stack.capacity; i++)     
+    {                                               
+        printf ("   ");                             
+        if (i < stack.size)                        
+            printf  ("*");                          
+        else                                        
+            printf (" ");                           
+        printf  ("[%lu\t] = " STACK_PRINT_TYPE "\n", i, stack.start[i]);                
+    }                                               
+                                                    
+    printf ("   }\n}\n");                           
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void UnitTest ()
+{
+    Stack stack1 = {};
+    Stack stack2 = {};
+    Stack stack3 = {};
+
+    char test1[] = "PRESS F TO PAY RESPECTS";
+    char test2[] = "HAHA OFIGENNO";
+    char test3[] = "42 or 97 hmmmmmmmm";
+
+    StackCtor (&stack1, 50);
+    StackCtor (&stack2, 50);
+    StackCtor (&stack3, 50);
+
+    for (int i = 0; test1[i]; i++)
+        StackPush (&stack1, test1[i]);
+
+    for (int i = 0; test2[i]; i++)
+        StackPush (&stack2, test2[i]);
+
+    for (int i = 0; test3[i]; i++)
+        StackPush (&stack3, test3[i]);
+
+    StackDump (stack1);
+    StackDump (stack2);
+    StackDump (stack3);
 }
