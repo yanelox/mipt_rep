@@ -20,6 +20,10 @@ enum returned_values
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+int exit_code = 0;
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 /*!
     \brief  New type string: start - pointer to start of string, len - length of string
 */
@@ -225,8 +229,8 @@ int OrigStrToFile       (char* str, char* file_name, char* mode);
     @note   This function was written verify cases with capital letters and lowercase
             letters (because 'a' and 'A' has different codes in table of codings)
 */
-// letters_cmp
-int TrueDiffBtwLetters  (char a, char b);
+
+int LettersCmp          (char a, char b);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -248,6 +252,9 @@ int QPartition          (string* mass, int low, int high,
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+int FileAccess          (FILE* f);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int main (int argv, char* argc[])
 {   
@@ -259,50 +266,39 @@ int main (int argv, char* argc[])
     char* file_for_sort = argc[1];            
     char* sorted_file   = argc[2];
 
-    Check( GetValues (file_for_sort, &countStr, &countSym) );
-    Check(exit_code);
+    GetValues (file_for_sort, &countStr, &countSym);
 
-    //assert (checker == ALL_OK);
+    char* file_copy = (char*) calloc (countSym + 2, sizeof(char));                 
 
-    char* file_copy = (char*) calloc (countSym + 2, sizeof(char)); 
+    FromFileToStr (file_for_sort, file_copy, countSym);
 
-    assert (file_copy != NULL);                
+    string pointers_to_str = (string*) calloc (countStr, sizeof (string)); 
 
-    checker = FromFileToStr (file_for_sort, file_copy, countSym);
-    assert (checker == ALL_OK);
-
-    string pointers_to_str[countStr]; //Do not work
-
-    checker = FillPMassive (pointers_to_str, file_copy, countStr, countSym);
-    assert (checker == ALL_OK);
-
+    FillPMassive (pointers_to_str, file_copy, countStr, countSym);
+    
     qsort (pointers_to_str, countStr, sizeof(string), StrCompare);
 
-    checker = FromStrToFile (pointers_to_str, sorted_file, countStr, "w");
-    assert (checker == ALL_OK);
-
+    FromStrToFile (pointers_to_str, sorted_file, countStr, "w");
+    
     qsort (pointers_to_str, countStr, sizeof(string), StrRevCompare);
 
-    checker = FromStrToFile (pointers_to_str, sorted_file, countStr, "a");
-    assert (checker == ALL_OK);
-
-    checker = OrigStrToFile (file_copy, sorted_file, "a");
-    assert (checker == ALL_OK);
+    FromStrToFile (pointers_to_str, sorted_file, countStr, "a");
+    
+    OrigStrToFile (file_copy, sorted_file, "a");
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int GetValues (char* file_name, unsigned* countStr, unsigned* countSym)
 {
-    assert(file_name);
-    a
-    a
+    assert (file_name != NULL);
+    assert (countStr  != NULL);
+    assert (countSym  != NULL);
 
     FILE* f = fopen (file_name, "r");
-    //access F_OK
-    if (f == NULL and countStr != 0 and countSym != 0)
-        return SMTH_WRONG;
-    //TODO OpenFile
+
+    if (!FillAccess (f))
+        return 0;
 
     int cur_sym = 0, last_sym = 0;
 
@@ -326,7 +322,7 @@ int GetValues (char* file_name, unsigned* countStr, unsigned* countSym)
 
     fclose (f);
 
-    return ALL_OK;
+    return 1;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -588,7 +584,7 @@ int OrigStrToFile (char* str, char* file_name, char* mode)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int TrueDiffBtwLetters (char a, char b)
+int LettersCmp (char a, char b)
 {
     //tolower!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if ((a >= 'A') and (a <= 'Z'))
@@ -630,3 +626,14 @@ int Partition (string* mass, int low, int high, int (* CompareFunc)(const void* 
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int FileAccess (FILE* f)
+{
+    if (f == NULL)
+    {
+        exit_code = -1;
+        return 0;
+    }
+
+    return 1;
+}

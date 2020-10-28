@@ -18,17 +18,17 @@ typedef struct
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-Poly sum_poly               (Poly poly1, Poly poly2, int k);
+void sum_poly               (Poly poly1, Poly poly2, int k, Poly* res);
 
-Poly simple_mult            (Poly poly1, Poly poly2);
+void simple_mult            (Poly poly1, Poly poly2, Poly* res);
 
 Poly KaratsubaAlg           (Poly poly1, Poly poly2);
 
-Poly GetFirstPart           (Poly poly);
+void GetFirstPart           (Poly poly, Poly* res);
 
-Poly GetSecondPart          (Poly poly);
+void GetSecondPart          (Poly poly, Poly* res);
 
-Poly KaratsubaSum           (Poly first, Poly second, Poly third);
+void KaratsubaSum           (Poly first, Poly second, Poly third, Poly* res);
 
 void PrintPoly              (Poly poly);
 
@@ -65,31 +65,19 @@ int main ()
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-Poly sum_poly (Poly poly1, Poly poly2, int k)
+void sum_poly (Poly poly1, Poly poly2, int k, Poly* res)
 {
-    int new_size = poly1.n;
-
-    Poly res = {new_size, (int*) calloc (new_size, sizeof (int))};
-
     for (unsigned i = 0; i < poly1.n; ++i)
-        res.p[i] = poly1.p[i] + k * poly2.p[i];
-
-    return res;
+        res->p[i] = poly1.p[i] + k * poly2.p[i];
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-Poly simple_mult (Poly poly1, Poly poly2)
-{
-    unsigned new_size = poly1.n + poly2.n - 1;
-
-    Poly res = {new_size, (int*) calloc (new_size, sizeof (int))};
-
+void simple_mult (Poly poly1, Poly poly2, Poly* res)
+{   
     for (unsigned i = 0; i < poly1.n; i++)
         for (unsigned j = 0; j < poly2.n; j++)
-            res.p[i + j] += poly1.p[i] * poly2.p[j]; 
-    
-    return res;
+            res->p[i + j] += poly1.p[i] * poly2.p[j]; 
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -106,45 +94,74 @@ Poly KaratsubaAlg (Poly poly1, Poly poly2)
     Poly AB;
     Poly M;
 
-    int* tmp;
-
     if (poly1.n < 1000 and poly2.n < 1000)
-        return simple_mult (poly1, poly2);
+    {
+        x.n = poly1.n + poly2.n - 1;
+        x.p = (int*) calloc (x.n, sizeof (int));
 
-    x = GetFirstPart (poly1);
-    y = GetFirstPart (poly2);
+        simple_mult (poly1, poly2, &x);
+
+        return x;
+    }
+
+////
+
+    GetFirstPart (poly1, &x);
+    GetFirstPart (poly2, &y);
 
     A0B0 = KaratsubaAlg (x, y);
 
-    x = GetSecondPart (poly1);
-    y = GetSecondPart (poly2);
+////
+
+    GetSecondPart (poly1, &x);
+    GetSecondPart (poly2, &y);
 
     A1B1 = KaratsubaAlg (x, y);
 
-    x = GetFirstPart (poly1);
-    y = GetSecondPart (poly1);
+////
 
-    A10 = sum_poly (x, y, 1);
+    GetFirstPart (poly1, &x);
+    GetSecondPart (poly1, &y);
 
-    x = GetFirstPart (poly2);
-    y = GetSecondPart (poly2);
+    A10.n = poly1.n / 2;
+    A10.p = (int*) calloc (A10.n, sizeof (int));
 
-    B10 = sum_poly (x, y, 1);
+    sum_poly (x, y, 1, &A10);
+
+////
+
+    GetFirstPart (poly2, &x);
+    GetSecondPart (poly2, &y);
+
+    B10.n = poly2.n / 2;
+    B10.p = (int*) calloc (B10.n, sizeof (int));
+
+    sum_poly (x, y, 1, &B10);
+
+////
 
     AB = KaratsubaAlg (A10, B10);
 
     free (A10.p);
     free (B10.p);
 
-    M = sum_poly (AB, A1B1, -1);
+////
 
-    tmp = M.p;
+    M.n = AB.n;
+    M.p = (int*) calloc (M.n, sizeof (int));
 
-    M = sum_poly (M, A0B0, -1);
+    sum_poly (AB, A1B1, -1, &M);
 
-    free (tmp);
+    sum_poly (M, A0B0, -1, &M);
 
-    AB = KaratsubaSum (A0B0, M, A1B1);
+    free (AB.p);
+
+////
+
+    AB.n = 2 * A0B0.n + 1;
+    AB.p = (int*) calloc (AB.n, sizeof (int));
+
+    KaratsubaSum (A0B0, M, A1B1, &AB);
 
     free (A1B1.p);
     free (A0B0.p);
@@ -155,51 +172,38 @@ Poly KaratsubaAlg (Poly poly1, Poly poly2)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-Poly GetFirstPart (Poly poly)
+void GetFirstPart (Poly poly, Poly* res)
 {
     unsigned half_size = poly.n / 2;
 
-    Poly res = poly;
-
-    res.n = half_size;
-
-    return res;
+    res->n = half_size;
+    res->p = poly.p;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-Poly GetSecondPart (Poly poly)
+void GetSecondPart (Poly poly, Poly* res)
 {
     unsigned half_size = poly.n / 2;
 
-    Poly res = poly;
-
-    res.p += half_size;
-    res.n = half_size;   
-
-    return res;
+    res->n = half_size;
+    res->p = poly.p + half_size;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-Poly KaratsubaSum (Poly first, Poly second, Poly third)
+void KaratsubaSum (Poly first, Poly second, Poly third, Poly* res)
 {
     unsigned n = first.n + 1;
 
-    unsigned new_size = 2 * n - 1;
-
-    Poly res = {new_size, (int*) calloc (new_size, sizeof (int))};
-
     for (unsigned i = 0; i < first.n; i++)
     {
-        res.p[i] += first.p[i];
+        res->p[i] += first.p[i];
 
-        res.p[i + n / 2] += second.p[i];
+        res->p[i + n / 2] += second.p[i];
 
-        res.p[i + n] += third.p[i];
+        res->p[i + n] += third.p[i];
     }
-
-    return res;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
