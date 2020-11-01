@@ -43,8 +43,7 @@ enum func_codes
     StrRevCompare_CODE  = 0x227200,
     QuickSort_CODE      = 0x227400,
     JSwap_CODE          = 0x227700,
-    OrigStrToFile_CODE  = 0x227900,
-    FileAccess_CODE     = 0x229200
+    OrigStrToFile_CODE  = 0x227900
 };
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -679,3 +678,96 @@ int LettersCmp (char a, char b)
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void PrintExit ()
+{
+    int tmp = onegin_exit_code % 256;
+
+    if (tmp == NO_EXCEPTIONS)
+    {
+        printf ("No exceptions\n");
+        return;
+    }
+
+    switch (tmp)
+    {
+        case FILE_OPEN_ERROR:
+            printf ("Failed to open file in ");
+            break;
+
+        case FILE_CLOSE_ERROR:
+            printf ("Failed to close file in ");
+            break;
+
+        case FREAD_ERROR:
+            printf ("fread() returns incorrect value in ");
+            break;
+
+        case FSEEK_ERROR:
+            printf ("fseek() returns incorrect value in ");
+            break;
+
+        default:
+            printf ("Unknown exception code in ");
+            break;
+    }
+
+    tmp = onegin_exit_code / 256 * 256;
+
+    switch (tmp)
+    {
+        case CountSymbols_CODE:
+            printf ("CountSymblos() ");
+            break;
+
+        case CountStr_CODE:
+            printf ("CountStr() ");
+            break;
+
+        case FromFileToStr_CODE:
+            printf ("FromFileToStr() ");
+            break;
+
+        case FromStrToFile_CODE:
+            printf ("FromStrToFile() ");
+            break;
+
+        case init_CODE:
+            printf ("init() ");
+            break;
+
+        case FillPMassive_CODE:
+            printf ("FillPMassive() ");
+            break;
+
+        case PrintStr_CODE:
+            printf ("PrintStr() ");
+            break;
+
+        case StrCompare_CODE:
+            printf ("StrCompare() ");
+            break;
+
+        case StrRevCompare_CODE:
+            printf ("StrRevCompare() ");
+            break;
+
+        case QuickSort_CODE:
+            printf ("QuickSort() ");
+            break;
+
+        case JSwap_CODE:
+            printf ("JSwap() ");
+            break;
+
+        case OrigStrToFile_CODE:
+            printf ("OrigStrToFile() ");
+            break;
+        
+        default:
+            printf ("unknown ");
+            break;
+    }
+
+    printf ("func\n");
+}
