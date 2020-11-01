@@ -4,24 +4,56 @@
 #include <ctype.h>
 #include <locale.h> 
 
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  //TODO: add asserts
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  
                                                                                         //TODO: fix documentation
 #define and &&
 #define or ||
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-/// Enumerate of returned values by fucntion which used to catch errors
+/*!
+    \brief  Enumerate of code of errors
+*/
 
-enum returned_values 
+enum exit_codes 
 {
-    ALL_OK = 42,            // All is OK
-    SMTH_WRONG = - 42       // Something not OK
+    NO_EXCEPTIONS       = 0x000000, //If all is OK
+    FILE_OPEN_ERROR     = 0x000002,
+    FREAD_ERROR         = 0x000004,
+    FSEEK_ERROR         = 0x000007,
+    FILE_CLOSE_ERROR    = 0x000009
 };
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int exit_code = 0;
+/*!
+    \brief  Enumerate of code of functions to detect where was detected errors
+*/
+
+enum func_codes
+{
+    CountSymbols_CODE   = 0x222200,
+    CountStr_CODE       = 0x222400,
+    FromFileToStr_CODE  = 0x222700,
+    FromStrToFile_CODE  = 0x222900,
+    init_CODE           = 0x224200,
+    FillPMassive_CODE   = 0x224400,
+    PrintStr_CODE       = 0x224700,
+    StrCompare_CODE     = 0x224900,
+    StrRevCompare_CODE  = 0x227200,
+    QuickSort_CODE      = 0x227400,
+    JSwap_CODE          = 0x227700,
+    OrigStrToFile_CODE  = 0x227900,
+    FileAccess_CODE     = 0x229200
+};
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+/*!
+    \brief  Global variable which contents exit code 
+*/
+
+int onegin_exit_code = 0;
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -40,19 +72,25 @@ string;
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 /*!
-    \brief  Function, which count number of symbols and strings in text (string)
+    \brief  Function which count number of symbols (string)
 
     @param  [in] file_name Pointer to string where is necessary text
-    @param  [in] countStr Pointer to variable where will be written number of strings
-    @param  [in] countSym Pointer to variable where will be written number of symbols
     
-    @return Returns ALL_OK if there isn't any exeptions and 
-            SMTH_WRONG in all another cases
+    @return Returns count of symbols in string or -1 if smth incorrect
 */
 
 long int CountSymbols   (char* file_name);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+/*!
+    \brief  Function which count numbers of strings in text (string_name)
+
+    @param  [in] string_name    Pointer to string with text where
+                                we want to count strings
+
+    @return Returns count os string in text
+*/
 
 long int CountStr       (char* string_name);
 
@@ -169,11 +207,12 @@ int StrRevCompare       (const void* s1, const void* s2);
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 /*!
-    \brief  Quick sort realization for string's
+    \brief  Quick sort realization for any massive
 
-    @param  [in] mass Pointer to "string" massive
-    @param  [in] size Size of sorted massive
-    @param  [in] CompareFunc Function which compare two strings
+    @param  [in] p              Pointer to "string" massive
+    @param  [in] number         Size of sorted massive
+    @param  [in] size_el        Size of one element of massive in bytes
+    @param  [in] comparator     Function which compare two elements
 */
 
 void QuickSort          (void* p, size_t number, size_t size_el, 
@@ -182,10 +221,14 @@ void QuickSort          (void* p, size_t number, size_t size_el,
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 /*!
-    \brief  Function which swap two "string" elements
+    \brief  Function which swap two elements of the same data types using their 
+            size in bytes
 
-    @param  [in] s1 Pointer to first element
-    @param  [in] s2 Pointer to second element
+    @param  [in] el1        Pointer to first element
+    @param  [in] el2        Pointer to second element
+    @param  [in] size_el    Size of elements in bytes
+
+    @return Returns 0 if all correct
 */
 
 int JSwap               (void* el1, void* el2, size_t size_el);
@@ -221,10 +264,6 @@ int OrigStrToFile       (char* str, char* file_name, char* mode);
 */
 
 int LettersCmp          (char a, char b);
-
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-int FileAccess          (FILE* f);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -271,6 +310,12 @@ long int CountSymbols (char* file_name)
 
     FILE* f = fopen (file_name, "r");
 
+    if (f == NULL)
+    {
+        onegin_exit_code = CountSymbols_CODE + FILE_OPEN_ERROR;
+        return -1;
+    }
+
     fseek (f, 0, SEEK_END);
 
     count_sym = ftell (f);
@@ -279,7 +324,11 @@ long int CountSymbols (char* file_name)
 
     count_sym -= ftell (f);
 
-    fclose (f);
+    if (fclose (f) != 0)
+    {
+        onegin_exit_code = CountSymbols_CODE + FILE_CLOSE_ERROR;
+        return -1;
+    }
 
     return count_sym;
 }
@@ -288,6 +337,8 @@ long int CountSymbols (char* file_name)
 
 long int CountStr (char* string_name)
 {
+    assert (string_name != NULL);
+
     char c = string_name[0];
     char g = c;
     long int res = 0;
@@ -310,16 +361,18 @@ long int CountStr (char* string_name)
 
 int FromFileToStr (char* file_name, char* str, unsigned len)
 {
-    FILE* f = fopen (file_name, "r");
+    assert (file_name != NULL);
+    assert (str != NULL);
 
-    if (f == NULL or str == NULL or len < 1)
-        return SMTH_WRONG;
+    FILE* f = fopen (file_name, "r");
 
     unsigned checker = fread (str, sizeof(char), len, f);
 
     if (checker != len)
-        return SMTH_WRONG;
-
+    {
+        onegin_exit_code = FromFileToStr_CODE + FREAD_ERROR;
+        return -1;
+    }
 
     if ( *(str + len - 1) != '\n')      // If we haven't '/n' in the end of str, we add it
     {
@@ -327,41 +380,61 @@ int FromFileToStr (char* file_name, char* str, unsigned len)
          *(str + len + 1) = '\0';
     }
 
-    fclose (f);
+    if (fclose (f) != 0)
+    {
+        onegin_exit_code = FromFileToStr_CODE + FILE_CLOSE_ERROR;
+        return -1;
+    }
 
-    return ALL_OK;
+    return 0;
 } 
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int FromStrToFile (string* str, char* file_name, unsigned countStr, char* mode)
 {
+    assert (str != NULL);
+    assert (file_name != NULL);
+    assert (mode != NULL);
+
     FILE* f = fopen (file_name, mode);
 
     if (f == NULL)
-        return SMTH_WRONG;
+    {
+        onegin_exit_code = FromStrToFile_CODE + FILE_OPEN_ERROR;
+        return -1;
+    }
 
     int checker = fseek (f, 0, SEEK_END);
 
     if (checker != 0)
-        return SMTH_WRONG;
+    {
+        onegin_exit_code = FromStrToFile_CODE + FSEEK_ERROR;
+        return -1;
+    }
 
     for (unsigned i = 0; i < countStr; ++i)
         if ((*(str + i)).len > 2)                       //We skip "empty" string (which have less then 2 symbols)
-            for (unsigned j = 0; j < str[i].len; j++)
+            for (unsigned j = 0; j < str[i].len; ++j)
                 fputc ((int) str[i].start[j], f);
     
     fputc ('\n', f); 
 
-    fclose (f); 
+    if (fclose (f) != 0)
+    {
+        onegin_exit_code = FromStrToFile_CODE + FILE_CLOSE_ERROR;
+        return -1;
+    }
 
-    return ALL_OK;
+    return 0;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 string init (unsigned length, char* start)
 {
+    assert (start != NULL);
+
     string str;
 
     str.len   = length;
@@ -374,9 +447,9 @@ string init (unsigned length, char* start)
 
 int FillPMassive (string* pointers_to_str, char* file_copy, unsigned countStr, unsigned countSym)
 {
-    if (file_copy == NULL or pointers_to_str == NULL)
-        return SMTH_WRONG;
-
+    assert (pointers_to_str != NULL);
+    assert (file_copy != NULL);
+    
     int cur_len = 0;
     char* cur_p = file_copy;
     int j = 0;
@@ -399,29 +472,29 @@ int FillPMassive (string* pointers_to_str, char* file_copy, unsigned countStr, u
         pointers_to_str[i].start    = cur_p;     
     }
 
-    return ALL_OK;
+    return 0;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int PrintStr (char* str, string* str1, unsigned countStr)
 {
-    if (str == NULL or str1 == NULL)
-        return SMTH_WRONG;
+    assert (str != NULL);
+    assert (str1 != NULL);
 
-    for (unsigned i = 0; i < countStr; i++)
-        for (unsigned j = 0; j < str1[i].len; j++)
+    for (unsigned i = 0; i < countStr; ++i)
+        for (unsigned j = 0; j < str1[i].len; ++j)
             printf ("%c", str1[i].start[j]); 
 
-    return ALL_OK;
+    return 0;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int StrCompare (const void* s1, const void* s2)
 {
-    if (s1 == NULL or s2 == NULL)
-        return SMTH_WRONG;
+    assert (s1 != NULL);
+    assert (s2 != NULL);
  
     string* str1 = (string*) s1;
     string* str2 = (string*) s2;
@@ -459,8 +532,8 @@ int StrCompare (const void* s1, const void* s2)
 
 int StrRevCompare (const void* s1, const void* s2)  
 {
-    if (s1 == NULL or s2 == NULL)
-        return SMTH_WRONG;
+    assert (s1 != NULL);
+    assert (s2 != NULL);    
 
     string* str1 = (string*) s1;
     string* str2 = (string*) s2; 
@@ -512,6 +585,9 @@ int StrRevCompare (const void* s1, const void* s2)
 
 void QuickSort (void* p, size_t number, size_t size_el, int (*comparator) (const void*, const void*))
 {
+    assert (p != NULL);
+    assert (comparator != NULL);
+
     char* start = (char*) p;
 
     int right = number - 1;
@@ -542,6 +618,9 @@ void QuickSort (void* p, size_t number, size_t size_el, int (*comparator) (const
 
 int JSwap (void* el1, void* el2, size_t size_el)
 {
+    assert (el1 != NULL);
+    assert (el2 != NULL);
+
     char* s1 = (char*) el1;
     char* s2 = (char*) el2;
     char tmp;
@@ -552,24 +631,37 @@ int JSwap (void* el1, void* el2, size_t size_el)
         s1[i] = s2[i];
         s2[i] = tmp;
     }
+
+    return 0;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int OrigStrToFile (char* str, char* file_name, char* mode)
 {
+    assert (str != NULL);
+    assert (file_name != NULL);
+    assert (mode != NULL);
+
     FILE* f = fopen (file_name, mode);
 
     if (f == NULL)
-        return SMTH_WRONG;
+    {
+        onegin_exit_code = OrigStrToFile_CODE + FILE_OPEN_ERROR;
+        return -1;
+    }
 
     fprintf (f, "%s", str);
 
-    fprintf (f, "\n");
+    fputc ('\n', f);
 
-    fclose (f);
+    if (fclose (f) != 0)
+    {
+        onegin_exit_code = OrigStrToFile_CODE + FILE_CLOSE_ERROR;
+        return -1;
+    }
 
-    return ALL_OK;
+    return 0;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
