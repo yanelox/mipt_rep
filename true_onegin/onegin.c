@@ -5,7 +5,7 @@
 #include <locale.h> 
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  
-                                                                                        //TODO: fix documentation
+                                                                                      
 #define and &&
 #define or ||
 
