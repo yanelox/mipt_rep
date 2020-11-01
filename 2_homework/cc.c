@@ -1,18 +1,16 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-#define or ||
 #define and &&
+#define or ||
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int is_prime (unsigned n)
+int IsSimple (int a)
 {
-    for (int i = 2; i < sqrt(n) + 1; i++)
-        if (n % i == 0)
+    for (int i = 2; i * i <= a; ++i)
+        if (a % i == 0)
             return 0;
 
     return 1;
@@ -20,62 +18,37 @@ int is_prime (unsigned n)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int can_be_cs (unsigned n)
+int cc (int a)
 {
-    while (n > 0)
+    int k = 1;
+    int r = 0;
+    int b = a;
+    int s = 0;
+
+    while (b)
     {
-        if (n % 10 != 1 and n % 10 != 3 and n % 10 != 7 and n % 10 != 9)
-            return 0;
-
-        n /= 10;
-    }
-
-    return 1;
-}
-
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-int is_cs (unsigned n)
-{
-    int k = 1, c = n, g = n;
-
-    while (c > 0)
-    {
+        b /= 10;
+        ++r;
         k *= 10;
-        c /= 10;
     }
 
     k /= 10;
 
-    do
+    for (int i = 0; i < r; ++i)
     {
-        if (!is_prime(g))
-            return 0;
+        if (IsSimple (a))
+            ++s;
 
-        g = (n % 10) * k + n / 10;
+        b = a % 10;
+        a /= 10;
+        a += b * k;
     }
 
-    while (g != n);
-    
-    return 1;
-}
+    if (s == r)
+        return 1;
 
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-unsigned near_cs (unsigned n)
-{
-    int i = 1;
-
-    for (;;)
-    {
-        if (n - i > 0 and is_cs (n - i))
-            return n - i;
-
-        if (is_cs(n + i))
-            return n + i;
-
-        i++;
-    }
+    else
+        return 0;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -83,8 +56,29 @@ unsigned near_cs (unsigned n)
 int main ()
 {
     int n;
-    
+    int a;
+    int b;
+
     scanf ("%d", &n);
 
-    printf ("%d", near_cs (n));
+    a = n;
+    b = n;
+
+    while ((cc (a) == 0) and (cc (b) == 0))
+    {
+        if (a > 1)
+            a--;
+        
+        b++;
+    }
+
+    if (cc (a) == 1)
+        if (cc (b) != 1 or (cc (b) == 1) and (n - a < b - n))
+            printf ("%d", a);
+
+        else    
+            printf ("%d", b);
+
+    else
+        printf ("%d", b);
 }
