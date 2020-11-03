@@ -18,41 +18,15 @@ void swap (int* a, int* b)
 
 unsigned partition(int *arr, unsigned low, unsigned high)
 {
-    unsigned mid = (low + high) / 2;
+    unsigned last = low;
 
-    int partititor;
+    for (unsigned i = low; i <= high; ++i)
+        if (arr[i] < arr[low])
+            swap (arr + i, arr + ++last);
 
-    unsigned left = low;
-    unsigned right = high;
+    swap (arr + low, arr + last);
 
-    swap (arr + low, arr + mid);
-
-    partititor = arr[mid];
-
-    while (left < right)
-    {
-        while (arr[left] < partititor and left < right)
-            left++;
-        
-        while (arr[right] > partititor and left < right)
-            right--;
-
-        if (left <= right)  
-        {
-            swap (arr + left, arr + right);
-
-            if (left == mid)
-                mid = right;
-
-            else if (right == mid)
-                mid = left;
-
-            left++;
-            right--;
-        }
-    }
-
-    return mid;
+    return last;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

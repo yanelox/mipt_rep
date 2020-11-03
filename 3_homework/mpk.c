@@ -94,7 +94,7 @@ Poly KaratsubaAlg (Poly poly1, Poly poly2)
     Poly AB;
     Poly M;
 
-    if (poly1.n < 1000 and poly2.n < 1000)
+    if (poly1.n < 100 and poly2.n < 100)
     {
         x.n = poly1.n + poly2.n - 1;
         x.p = (int*) calloc (x.n, sizeof (int));
