@@ -329,7 +329,7 @@ long int CountSymbols (char* file_name)
         return -1;
     }
 
-    return count_sym;
+    return count_sym + 2;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

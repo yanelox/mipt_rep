@@ -19,44 +19,47 @@ int cmp (void* lhs, int lsz, void* rhs, int rcz)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+int sum (int* arr, int start, int end)
+{
+    int res = 0;
+
+    for (int i = start; i <= end; ++i)
+        res += arr[i];
+
+    return res;    
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 void xmerge (void* mem, int m, int* sizes, int nelts, xcmp_t cmp)
 {
-    void* el1;
-    void* el2;
+    char* el1;
+    char* el2;
+
+    int i;
+    int j;
+    int start = m;
 
     int sum1 = 0;
     int sum2 = 0;
 
-    for (int i = 0; i < m; i++)
-        sum2 += sizes[i];
+    sum2 = sum (sizes, 0, m - 1);
 
-    for (int i = 0, j = m; i < m and j < nelts;)
+    for (i = 0; i < m; ++i)
     {
-        el1 = (void*) ((char*) mem + sum1);
-        el2 = (void*) ((char*) mem + sum2);
+        el1 = (char*) mem;
 
-        sum1 += sizes[i];
-        sum2 += sizes[j];
-
-        if (cmp (el1, sizes[i], el2, sizes[j]) > 0)
+        for (j = start; j < nelts; ++j)
         {
-            char* tmp = (char*) calloc (sizes[j], 1);
+            el2 = (char*) mem + sum (sizes, 0, j);
 
-            for (int k = 0; k < sizes[j]; k++)
-                tmp[j] = *((char*) el2 + j);
-
-            for (int k = sum2 - 1; k >= sum1; k--)
-                *((char*) el2 + k + sizes[j]) = *((char*) el2 + k);
-
-            for (int k = 0; k < sizes[j]; k++)
-                *((char*) el1 + k) = tmp[k];
-
-            j++;
-
-            free (tmp);
+            if (cmp (el1, el2))
+                break;
         }
 
-        i++;
+        --j;
+
+        for (int k = 0; )
     }
 }
 
@@ -70,10 +73,10 @@ void xmsort(void *mem, int *sizes, int nelts, xcmp_t cmp)
 
     void* tmp_mem;
 
-    if (nelts <= 0)
+    if (m <= 0)
         return;
 
-    for (int i = 0; i < m; i++)
+    for (int i = 0; i < m; ++i)
         first_sum += sizes[i];
 
     tmp_mem = (void*) ((char*) mem + first_sum);

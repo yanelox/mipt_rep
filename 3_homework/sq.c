@@ -19,12 +19,16 @@ void swap (int* a, int* b)
 unsigned partition(int *arr, unsigned low, unsigned high)
 {
     unsigned last = low;
+    int tmp = arr[low];
 
-    for (unsigned i = low; i <= high; ++i)
+    for (unsigned i = low + 1; i <= high; ++i)
         if (arr[i] < arr[low])
             swap (arr + i, arr + ++last);
 
-    swap (arr + low, arr + last);
+    for (unsigned i = low; i < last; ++i)
+        arr[i] = arr[i + 1];
+
+    arr[last] = tmp;
 
     return last;
 }
