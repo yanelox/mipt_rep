@@ -38,31 +38,32 @@ const size_t number_commands = 8;
 
 enum assm_input_types
 {
-    COMMAND_CODE    = 2200,
-    DOUBLE_CODE     = 2400,
-    INT_CODE        = 2700,
-    ERROR_CODE      = 9900
+    ASSM_COMMAND_CODE    = 2200,
+    ASSM_DOUBLE_CODE     = 2400,
+    ASSM_INT_CODE        = 2700,
+    ASSM_ERROR_CODE      = 9900
 };
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 enum assm_exit_codes
 {
-    NO_EXCEPTIONS_ASSM  = 00,
-    INCORRECT_COMMAND   = 22,
-    INPUT_EXCEPTION     = 24
+    NO_EXCEPTIONS_ASSM      = 00,
+    ASSM_INCORRECT_COMMAND  = 22,
+    ASSM_INPUT_EXCEPTION    = 24,
+    ASSM_FOPEN_ERROR        = 27,
+    ASSM_FCLOSE_ERROR       = 29
 };
 
-unsigned assm_exit_code = 0;
+int assm_exit_code = 0;
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 enum assm_func_codes
 {
-    WHICHCOMMAND_CODE   = 2200,
-    TYPEOFINPUT_CODE    = 2400,
-    ISNUMBER_CODE       = 2700,
-    ASSEMBLING_CODE     = 2900
+    ASSM_WHICHCOMMAND_CODE   = 2200,
+    ASSM_TYPEOFINPUT_CODE    = 2400,
+    ASSM_ASSEMBLING_CODE     = 2700
 };
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -75,37 +76,58 @@ const char delim[] = " \n";
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int WhichCommand (char* lexem, size_t len);
+int WhichCommand            (char* lexem, size_t len);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-unsigned typeOfInput (char* lexem, size_t len);
+unsigned typeOfInput        (char* lexem, size_t len);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int IsNumber (char a);
+void Assembling             (char* code_file, char* code_copy);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void Assembling (char* code_file, char* code_copy);
+void Assm_PrintExitCode     ();
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int main (int argc, char* argv[])
 {
-    assert ((argv[2][0] == '-') and (argv[2][1] == 'o'));
+    if (argc != 3)
+    {
+        printf ("Incorrect arguments\n");
+        return 0;
+    }
 
     char* assm_file = argv[1];
-    char* code_file = argv[3];
+    char* code_file = argv[2];
 
     char* code_copy = NULL;
 
-    long int countSym = 0;
+    long int count_sym = 0;
 
-    countSym = CountSymbols (assm_file);
-    code_copy = (char*) calloc (countSym, sizeof (char));
+    count_sym = CountSymbols (assm_file);
 
-    FromFileToStr (assm_file, code_copy, countSym);
+    if (count_sym == -1)
+    {
+        Onegin_PrintExitCode();
+        return 0;
+    }
+
+    code_copy = (char*) calloc (count_sym, sizeof (char));
+
+    if (code_copy == NULL)
+    {
+        printf ("Allocation error\n");
+        return 0;
+    }
+
+    if (FromFileToStr (assm_file, code_copy, count_sym) == -1)
+    {
+        Onegin_PrintExitCode();
+        return 0;
+    }
 
     Assembling (code_file, code_copy);
 
@@ -124,7 +146,7 @@ int WhichCommand (char* lexem, size_t len)
         if (StrCompare (&tmp, &commands[i].text) == 0)
             return commands[i].code;
 
-    assm_exit_code = INCORRECT_COMMAND + WHICHCOMMAND_CODE;
+    assm_exit_code = ASSM_INCORRECT_COMMAND + ASSM_WHICHCOMMAND_CODE;
 
     return -1;
 }
@@ -141,43 +163,43 @@ unsigned typeOfInput (char* lexem, size_t len)
         if (isalpha (lexem[i]))
         {
             if (res == 0)
-                res = COMMAND_CODE;
+                res = ASSM_COMMAND_CODE;
 
-            else if (res != COMMAND_CODE)
+            else if (res != ASSM_COMMAND_CODE)
             {
-                assm_exit_code = INPUT_EXCEPTION + TYPEOFINPUT_CODE;
-                return ERROR_CODE;
+                assm_exit_code = ASSM_INPUT_EXCEPTION + ASSM_TYPEOFINPUT_CODE;
+                return ASSM_ERROR_CODE;
             }
         }
 
-        else if (IsNumber (lexem[i]))
+        else if (isdigit (lexem[i]))
         {
             if (res == 0)
-                res = INT_CODE;
+                res = ASSM_INT_CODE;
 
-            else if ((res != INT_CODE) and (res != DOUBLE_CODE))
+            else if ((res != ASSM_INT_CODE) and (res != ASSM_DOUBLE_CODE))
             {
-                assm_exit_code = INPUT_EXCEPTION + TYPEOFINPUT_CODE;
-                return ERROR_CODE;
+                assm_exit_code = ASSM_INPUT_EXCEPTION + ASSM_TYPEOFINPUT_CODE;
+                return ASSM_ERROR_CODE;
             }
         }
 
         else if (lexem[i] == '.')
         {
-            if (res == INT_CODE)
-                res = DOUBLE_CODE;
+            if (res == ASSM_INT_CODE)
+                res = ASSM_DOUBLE_CODE;
 
             else
             {
-                assm_exit_code = INPUT_EXCEPTION + TYPEOFINPUT_CODE;
-                return ERROR_CODE;
+                assm_exit_code = ASSM_INPUT_EXCEPTION + ASSM_TYPEOFINPUT_CODE;
+                return ASSM_ERROR_CODE;
             }
         }
 
         else
         {
-            assm_exit_code = INPUT_EXCEPTION + TYPEOFINPUT_CODE;
-            return ERROR_CODE;
+            assm_exit_code = ASSM_INPUT_EXCEPTION + ASSM_TYPEOFINPUT_CODE;
+            return ASSM_ERROR_CODE;
         }
 
     return res;
@@ -185,52 +207,53 @@ unsigned typeOfInput (char* lexem, size_t len)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int IsNumber (char a)
-{
-    if ((a - '0' >= 0) and (a - '0' < 10))
-        return 1;
-
-    return 0;
-}
-
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
 void Assembling (char* code_file, char* code_copy)
 {
+    assert (code_file);
+    assert (code_copy);
+
     FILE* f = fopen (code_file, "w");
 
+    if (f == NULL)
+    {
+        assm_exit_code = ASSM_FOPEN_ERROR + ASSM_ASSEMBLING_CODE;
+        return;
+    }
+
     char* lexem = NULL;
-    int tmp = -1;
+
+    int prog_status = 1;
+    int input = -1;
 
     lexem = strtok (code_copy, delim);
 
-    while (lexem)
+    while (lexem and prog_status)
     {
-        tmp = typeOfInput (lexem, strlen (lexem));
+        input = typeOfInput (lexem, strlen (lexem));
 
         CheckExitCode();
 
-        switch (tmp)
+        switch (input)
         {
-            case COMMAND_CODE:
-                tmp = WhichCommand (lexem, strlen (lexem));
+            case ASSM_COMMAND_CODE:
+                input = WhichCommand (lexem, strlen (lexem));
                 
                 CheckExitCode();
 
-                fprintf (f, "%d\n", tmp);
-
+                fprintf (f, "%d\n", input);
                 break;
 
-            case DOUBLE_CODE:
+            case ASSM_DOUBLE_CODE:
                 fprintf (f, "%s\n", lexem);
                 break;
 
-            case INT_CODE:
+            case ASSM_INT_CODE:
                 fprintf (f, "%s\n", lexem);
                 break;
 
             default:
-                assert (0);
+                assm_exit_code = ASSM_ASSEMBLING_CODE + ASSM_INPUT_EXCEPTION;
+                prog_status = 0;
                 break;
 
         }
@@ -238,5 +261,71 @@ void Assembling (char* code_file, char* code_copy)
         lexem = strtok (NULL, delim);
     }
 
-    fclose (f);
+    if (fclose (f) != 0)
+    {
+        assm_exit_code = ASSM_ASSEMBLING_CODE + ASSM_FCLOSE_ERROR;
+        return;
+    }
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void Assm_PrintExitCode ()
+{
+    int error_code  = assm_exit_code % 100;
+    int func_code   = assm_exit_code / 100 * 100;
+
+    int no_error_status = 0;
+
+    switch (error_code)
+    {
+        case NO_EXCEPTIONS_ASSM:
+            printf ("No exception found\n");
+            no_error_status = 1;
+            break;
+
+        case ASSM_INCORRECT_COMMAND:
+            printf ("Incorrect assembler command found in ");
+            break;
+
+        case ASSM_INPUT_EXCEPTION:
+            printf ("Incorrect input data found in ");
+            break;
+
+        case ASSM_FOPEN_ERROR:
+            printf ("File opening error in ");
+            break;
+
+        case ASSM_FCLOSE_ERROR:
+            printf ("File closing error in ");
+            break;
+
+        default:
+            printf ("Unkwonw error in ");
+            break;
+    }
+
+    if (no_error_status)
+        return;
+
+    switch (func_code)
+    {
+        case ASSM_WHICHCOMMAND_CODE:
+            printf ("WhichCommand() ");
+            break;
+
+        case ASSM_TYPEOFINPUT_CODE:
+            printf ("typeOfInput() ");
+            break;
+
+        case ASSM_ASSEMBLING_CODE:
+            printf ("Assembling() ");
+            break;
+
+        default:
+            printf ("unknown ");
+            break;
+    }
+
+    printf ("func\n");
 }

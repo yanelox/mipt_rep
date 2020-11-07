@@ -18,10 +18,10 @@
 enum onegin_exit_codes 
 {
     NO_EXCEPTIONS_ONEGIN    = 0x000000, //If all is OK
-    FILE_OPEN_ERROR         = 0x000002,
-    FREAD_ERROR             = 0x000004,
-    FSEEK_ERROR             = 0x000007,
-    FILE_CLOSE_ERROR        = 0x000009
+    ONEGIN_FILE_OPEN_ERROR  = 0x000002,
+    ONEGIN_FREAD_ERROR      = 0x000004,
+    ONEGIN_FSEEK_ERROR      = 0x000007,
+    ONEGIN_FILE_CLOSE_ERROR = 0x000009
 };
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -266,38 +266,12 @@ int LettersCmp          (char a, char b);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-// int main (int argc, char* argv[])
-// {   
-//     assert (argc >= 2);
+/*!
+    \brief  Function which print info about exception using exception code 
+            which stored in onegin_exit_code variabe
+*/
 
-//     long int countStr = 0;
-//     long int countSym = 0;
-
-//     char* file_for_sort = argv[1];
-//     char* sorted_file   = argv[2];
-
-//     countSym = CountSymbols (file_for_sort);
-
-//     char* file_copy = (char*) calloc (countSym + 2, sizeof(char));                 
-
-//     FromFileToStr (file_for_sort, file_copy, countSym);
-
-//     countStr = CountStr (file_copy);
-
-//     string* pointers_to_str = (string*) calloc (countStr, sizeof (string));
-
-//     FillPMassive (pointers_to_str, file_copy, countStr, countSym);
-    
-//     QuickSort (pointers_to_str, countStr, sizeof(string), StrCompare);
-
-//     FromStrToFile (pointers_to_str, sorted_file, countStr, "w");
-    
-//     QuickSort (pointers_to_str, countStr, sizeof(string), StrRevCompare);
-
-//     FromStrToFile (pointers_to_str, sorted_file, countStr, "a");
-    
-//     OrigStrToFile (file_copy, sorted_file, "a");
-// }
+void Onegin_PrintExitCode ();
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -311,7 +285,7 @@ long int CountSymbols (char* file_name)
 
     if (f == NULL)
     {
-        onegin_exit_code = CountSymbols_CODE + FILE_OPEN_ERROR;
+        onegin_exit_code = CountSymbols_CODE + ONEGIN_FILE_OPEN_ERROR;
         return -1;
     }
 
@@ -325,7 +299,7 @@ long int CountSymbols (char* file_name)
 
     if (fclose (f) != 0)
     {
-        onegin_exit_code = CountSymbols_CODE + FILE_CLOSE_ERROR;
+        onegin_exit_code = CountSymbols_CODE + ONEGIN_FILE_CLOSE_ERROR;
         return -1;
     }
 
@@ -367,9 +341,9 @@ int FromFileToStr (char* file_name, char* str, unsigned len)
 
     unsigned checker = fread (str, sizeof(char), len, f);
 
-    if (checker != len)
+    if (checker != len - 2)
     {
-        onegin_exit_code = FromFileToStr_CODE + FREAD_ERROR;
+        onegin_exit_code = FromFileToStr_CODE + ONEGIN_FREAD_ERROR;
         return -1;
     }
 
@@ -381,7 +355,7 @@ int FromFileToStr (char* file_name, char* str, unsigned len)
 
     if (fclose (f) != 0)
     {
-        onegin_exit_code = FromFileToStr_CODE + FILE_CLOSE_ERROR;
+        onegin_exit_code = FromFileToStr_CODE + ONEGIN_FILE_CLOSE_ERROR;
         return -1;
     }
 
@@ -400,7 +374,7 @@ int FromStrToFile (string* str, char* file_name, unsigned countStr, char* mode)
 
     if (f == NULL)
     {
-        onegin_exit_code = FromStrToFile_CODE + FILE_OPEN_ERROR;
+        onegin_exit_code = FromStrToFile_CODE + ONEGIN_FILE_OPEN_ERROR;
         return -1;
     }
 
@@ -408,7 +382,7 @@ int FromStrToFile (string* str, char* file_name, unsigned countStr, char* mode)
 
     if (checker != 0)
     {
-        onegin_exit_code = FromStrToFile_CODE + FSEEK_ERROR;
+        onegin_exit_code = FromStrToFile_CODE + ONEGIN_FSEEK_ERROR;
         return -1;
     }
 
@@ -421,7 +395,7 @@ int FromStrToFile (string* str, char* file_name, unsigned countStr, char* mode)
 
     if (fclose (f) != 0)
     {
-        onegin_exit_code = FromStrToFile_CODE + FILE_CLOSE_ERROR;
+        onegin_exit_code = FromStrToFile_CODE + ONEGIN_FILE_CLOSE_ERROR;
         return -1;
     }
 
@@ -640,7 +614,7 @@ int OrigStrToFile (char* str, char* file_name, char* mode)
 
     if (f == NULL)
     {
-        onegin_exit_code = OrigStrToFile_CODE + FILE_OPEN_ERROR;
+        onegin_exit_code = OrigStrToFile_CODE + ONEGIN_FILE_OPEN_ERROR;
         return -1;
     }
 
@@ -650,7 +624,7 @@ int OrigStrToFile (char* str, char* file_name, char* mode)
 
     if (fclose (f) != 0)
     {
-        onegin_exit_code = OrigStrToFile_CODE + FILE_CLOSE_ERROR;
+        onegin_exit_code = OrigStrToFile_CODE + ONEGIN_FILE_CLOSE_ERROR;
         return -1;
     }
 
@@ -673,7 +647,7 @@ int LettersCmp (char a, char b)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void PrintExit ()
+void Onegin_PrintExitCode ()
 {
     int tmp = onegin_exit_code % 256;
 
@@ -685,19 +659,19 @@ void PrintExit ()
 
     switch (tmp)
     {
-        case FILE_OPEN_ERROR:
+        case ONEGIN_FILE_OPEN_ERROR:
             printf ("Failed to open file in ");
             break;
 
-        case FILE_CLOSE_ERROR:
+        case ONEGIN_FILE_CLOSE_ERROR:
             printf ("Failed to close file in ");
             break;
 
-        case FREAD_ERROR:
+        case ONEGIN_FREAD_ERROR:
             printf ("fread() returns incorrect value in ");
             break;
 
-        case FSEEK_ERROR:
+        case ONEGIN_FSEEK_ERROR:
             printf ("fseek() returns incorrect value in ");
             break;
 

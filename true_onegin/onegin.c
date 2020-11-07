@@ -266,6 +266,15 @@ int LettersCmp          (char a, char b);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+/*!
+    \brief  Function which print info about exception using exception code 
+            which stored in onegin_exit_code variabe
+*/
+
+void PrintExit ();
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 int main (int argc, char* argv[])
 {   
     assert (argc >= 2);

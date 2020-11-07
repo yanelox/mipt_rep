@@ -1,9 +1,2 @@
-*.txt
-*.out
-SquareE/man
-SquareE/html
-SquareE/latex
-SquareE/condig
-SquareE/tempCodeRunnerFile.c
-true_onegin/html
-stack/main
+*
+!*.c*

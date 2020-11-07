@@ -33,7 +33,7 @@ double POISON = NAN;
 /*!
     \brief Variable which store message about errors
 */
-int exit_code = 0;
+int stack_exit_code = 0;
 
 /*!
     \brief Codes of exceptions
@@ -132,7 +132,7 @@ stack_type StackPop         (Stack* stack);
 
     @return 1, if all correct, 0 if there are some exceptions
 
-    @note   Write exception code to exit_code value
+    @note   Write exception code to stack_exit_code value
 */
 int StackValidity           (Stack stack, const int func_code);
 
@@ -165,6 +165,15 @@ int StackDecrease           (Stack* stack);
     @return             Calculated value of hash_sum
 */
 unsigned long long HashSum  (Stack stack);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+/*!
+    \brief  Function which print info about exception using exception code 
+            which stored in stack_stack_exit_code variable
+*/
+
+void Stack_PrintExitCode ();
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 /*!
@@ -204,7 +213,7 @@ void StackCtor (Stack* stack, size_t capacity)
 
     if (tmp_start == NULL)
     {
-        exit_code = MEMORY_ALLOC_ERROR + CTOR_CODE;
+        stack_exit_code = MEMORY_ALLOC_ERROR + CTOR_CODE;
         return;
     }
 
@@ -268,37 +277,37 @@ int StackValidity (Stack stack, const int func_code)
 {
     if (stack.start == NULL)
     {
-        exit_code = INCORRECT_STACK_POINTER + func_code;
+        stack_exit_code = INCORRECT_STACK_POINTER + func_code;
         return 0;
     }
 
     if (stack.size > stack.capacity or stack.size < 0)
     {
-        exit_code = INCORRECT_STACK_SIZE + func_code;
+        stack_exit_code = INCORRECT_STACK_SIZE + func_code;
         return 0;
     }
 
     if (stack.capacity < 0)
     {
-        exit_code = INCORRCT_STACK_CAPACITY + func_code;
+        stack_exit_code = INCORRCT_STACK_CAPACITY + func_code;
         return 0;
     }
 
     if (stack.StartBird != HUMMINGBIRD)
     {
-        exit_code = WRONG_START_HUMMINGBIRD + func_code;
+        stack_exit_code = WRONG_START_HUMMINGBIRD + func_code;
         return 0;
     }
 
     if (stack.EndBird != HUMMINGBIRD)
     {
-        exit_code = WRONG_END_HUMMINGBIRD + func_code;
+        stack_exit_code = WRONG_END_HUMMINGBIRD + func_code;
         return 0;
     }
 
     if (stack.hash != HashSum (stack))
     {
-        exit_code = WRONG_HASH_SUM + func_code;
+        stack_exit_code = WRONG_HASH_SUM + func_code;
         return 0;
     }
     
@@ -320,7 +329,7 @@ int StackIncrease (Stack* stack)
         
         if (res_pointer == NULL)
         {
-            exit_code = MEMORY_ALLOC_ERROR + INCREASE_CODE; 
+            stack_exit_code = MEMORY_ALLOC_ERROR + INCREASE_CODE; 
             return 0;
         }
         
@@ -349,7 +358,7 @@ int StackDecrease (Stack* stack)
 
         if (res_pointer == NULL)
         {
-            exit_code = MEMORY_ALLOC_ERROR + DECREASE_CODE;
+            stack_exit_code = MEMORY_ALLOC_ERROR + DECREASE_CODE;
             return 0;
         }
 
@@ -381,7 +390,7 @@ unsigned long long HashSum (Stack stack)
 
 void PrintExitCode ()
 {
-    int tmp = exit_code / 256 * 256;
+    int tmp = stack_exit_code / 256 * 256;
 
     if (tmp == NO_EXCEPTIONS)
     {
@@ -424,7 +433,7 @@ void PrintExitCode ()
             break;
     }
 
-    tmp = exit_code % 256;
+    tmp = stack_exit_code % 256;
 
     switch (tmp)
     {
@@ -469,7 +478,7 @@ void StackDumpF (Stack stack, const char* func_name, int line_number, const char
     if (check == 1)                                 
         printf ("Stack[OK]: ");          
     else                                           
-        printf ("Stack[WRONG][CODE: %d]: ", exit_code);                  
+        printf ("Stack[WRONG][CODE: %d]: ", stack_exit_code);                  
                                                     
     printf ("[%p] ", stack.start);
 
