@@ -47,7 +47,7 @@ enum dissass_comands_numbers
     DISS_SUB_CODE       = 42,
     DISS_DIV_CODE       = 44,
     DISS_OUT_CODE       = 47,
-    DISS_HLT_CODE       = 49
+    DISS_HLT_CODE       = 99
 };
 
 const size_t number_commands = 8;

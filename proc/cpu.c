@@ -19,7 +19,7 @@ enum commands
     CPU_SUB_CODE    =   42,
     CPU_DIV_CODE    =   44,
     CPU_OUT_CODE    =   47,
-    CPU_HLT_CODE    =   49
+    CPU_HLT_CODE    =   99
 };
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

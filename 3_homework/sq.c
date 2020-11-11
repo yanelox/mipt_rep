@@ -25,10 +25,7 @@ unsigned partition(int *arr, unsigned low, unsigned high)
         if (arr[i] < arr[low])
             swap (arr + i, arr + ++last);
 
-    for (unsigned i = low; i < last; ++i)
-        arr[i] = arr[i + 1];
-
-    arr[last] = tmp;
+    swap (arr + low, arr + last);
 
     return last;
 }

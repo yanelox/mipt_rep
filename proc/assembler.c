@@ -29,10 +29,11 @@ Command commands[] =
     {{3, "sub"},    42},
     {{3, "div"},    44},
     {{3, "out"},    47},
-    {{3, "hlt"},    49}
+    {{3, "jmp"},    49},
+    {{3, "hlt"},    99}
 };
 
-const size_t number_commands = 8;
+const size_t number_commands = 9;
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -41,6 +42,7 @@ enum assm_input_types
     ASSM_COMMAND_CODE    = 2200,
     ASSM_DOUBLE_CODE     = 2400,
     ASSM_INT_CODE        = 2700,
+    ASSM_LABEL_CODE      = 2900,
     ASSM_ERROR_CODE      = 9900
 };
 
@@ -73,10 +75,6 @@ const char delim[] = " \n";
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 #define CheckExitCode() assert(assm_exit_code == NO_EXCEPTIONS_ASSM);
-
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-int WhichCommand            (char* lexem, size_t len);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -123,6 +121,8 @@ int main (int argc, char* argv[])
         return 0;
     }
 
+    //printf ("lol\n");
+
     if (FromFileToStr (assm_file, code_copy, count_sym) == -1)
     {
         Onegin_PrintExitCode();
@@ -132,23 +132,8 @@ int main (int argc, char* argv[])
     Assembling (code_file, code_copy);
 
     printf ("Assembling succesfull\n");
-}
 
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-int WhichCommand (char* lexem, size_t len)
-{
-    assert (lexem != NULL);
-
-    string tmp = {len, lexem};
-
-    for (unsigned i = 0; i < number_commands; ++i)
-        if (StrCompare (&tmp, &commands[i].text) == 0)
-            return commands[i].code;
-
-    assm_exit_code = ASSM_INCORRECT_COMMAND + ASSM_WHICHCOMMAND_CODE;
-
-    return -1;
+    free (code_copy);
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -158,6 +143,8 @@ unsigned typeOfInput (char* lexem, size_t len)
     assert (lexem != NULL);
 
     unsigned res = 0;
+
+    string tmp = {len, lexem};
 
     for (unsigned i = 0; i < len; ++i)
         if (isalpha (lexem[i]))
@@ -202,6 +189,14 @@ unsigned typeOfInput (char* lexem, size_t len)
             return ASSM_ERROR_CODE;
         }
 
+    if (res == ASSM_COMMAND_CODE)
+        for (unsigned i = 0; i < number_commands; ++i)
+            if (StrCompare (&tmp, &commands[i].text) == 0)
+            {
+                res += commands[i].code;
+                break;
+            }
+
     return res;
 }
 
@@ -224,6 +219,7 @@ void Assembling (char* code_file, char* code_copy)
 
     int prog_status = 1;
     int input = -1;
+    int half_input = -1;
 
     lexem = strtok (code_copy, delim);
 
@@ -231,16 +227,16 @@ void Assembling (char* code_file, char* code_copy)
     {
         input = typeOfInput (lexem, strlen (lexem));
 
+        half_input = input / 100 * 100;
+
         CheckExitCode();
 
-        switch (input)
+        switch (half_input)
         {
             case ASSM_COMMAND_CODE:
-                input = WhichCommand (lexem, strlen (lexem));
-                
                 CheckExitCode();
 
-                fprintf (f, "%d\n", input);
+                fprintf (f, "%d\n", input % 100);
                 break;
 
             case ASSM_DOUBLE_CODE:
