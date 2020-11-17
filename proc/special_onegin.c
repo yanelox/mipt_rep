@@ -339,6 +339,12 @@ int FromFileToStr (char* file_name, char* str, unsigned len)
 
     FILE* f = fopen (file_name, "r");
 
+    if (f == NULL)
+    {
+        onegin_exit_code = FromFileToStr_CODE + ONEGIN_FILE_OPEN_ERROR;
+        return -1;
+    }
+
     unsigned checker = fread (str, sizeof(char), len, f);
 
     if (checker != len - 2)
@@ -347,10 +353,10 @@ int FromFileToStr (char* file_name, char* str, unsigned len)
         return -1;
     }
 
-    if ( *(str + len - 1) != '\n')      // If we haven't '/n' in the end of str, we add it
+    if ( *(str + len - 3) != '\n')      // If we haven't '/n' in the end of str, we add it
     {
-         *(str + len) = '\n';
-         *(str + len + 1) = '\0';
+         *(str + len - 2) = '\n';
+         *(str + len - 1) = '\0';
     }
 
     if (fclose (f) != 0)
@@ -438,6 +444,9 @@ int FillPMassive (string* pointers_to_str, char* file_copy, unsigned countStr, u
             cur_len++;
         }
 
+        if (file_copy[j] == '\n')
+            file_copy[j] = '\0';
+
         j++;
         cur_len++;
 
@@ -456,8 +465,7 @@ int PrintStr (char* str, string* str1, unsigned countStr)
     assert (str1 != NULL);
 
     for (unsigned i = 0; i < countStr; ++i)
-        for (unsigned j = 0; j < str1[i].len; ++j)
-            printf ("%c", str1[i].start[j]); 
+        printf ("%s\n", str1[i].start);
 
     return 0;
 }

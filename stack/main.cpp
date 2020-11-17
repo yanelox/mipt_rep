@@ -2,5 +2,6 @@
 
 int main ()
 {
-    UnitTest ();
+    Stack stack;
+    StackCtor ()
 }
