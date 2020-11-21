@@ -12,6 +12,16 @@
 
 typedef struct
 {
+    string label_name;
+
+    long int pointer;
+
+} label;
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+typedef struct
+{
     string text;
 
     int code;
@@ -29,7 +39,7 @@ Command commands[] =
     {{3, "sub"},    0x42},
     {{3, "div"},    0x44},
     {{3, "out"},    0x47},
-    {{3, "jmp"},    0x40},
+    {{3, "jmp"},    0x49},
     {{3, "hlt"},    0x99}
 };
 
@@ -52,7 +62,8 @@ enum assm_exit_codes
     ASSM_INCORRECT_COMMAND  = 22,
     ASSM_INPUT_EXCEPTION    = 24,
     ASSM_FOPEN_ERROR        = 27,
-    ASSM_FCLOSE_ERROR       = 29
+    ASSM_FCLOSE_ERROR       = 29,
+    ASSM_ALLOCATION_ERROR   = 42
 };
 
 int assm_exit_code = 0;
@@ -76,12 +87,13 @@ const char delim[] = " \n";
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-unsigned typeOfInput        (string s, double* number);
+unsigned typeOfInput        (string s, double* number, string label_name);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void Assembling             (char* code_file, char* code_copy, 
-                            string* str1, int* labels, long int count_str);
+void Assembling             (char* code_file, char* code_copy, string* str1, 
+                            label* labels, long int label_number, 
+                            long int count_str);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -100,17 +112,19 @@ int main (int argc, char* argv[])
     char* assm_file = argv[1];
     char* code_file = argv[2];
 
-    char* code_copy    = NULL;
+    char* code_copy = NULL;
 
     long int count_sym = 0;
     long int count_str = 0;
 
-    string* pointers_to_str;
+    string* pointers_to_str = (string*) calloc (count_str, sizeof (string)); 
+    label* labels = (label*)  calloc (1, sizeof (label));
 
-    int* labels = (int*) calloc (10, sizeof (long int));
+    long int label_number = 0;
 
-    for (int i = 0; i < 10; ++i)
-        labels[i] = -1;
+    labels[0].label_name.start = NULL;
+    labels[0].label_name.len   = 0;
+    labels[0].pointer          = 0;
 
     count_sym = CountSymbols (assm_file);
 
@@ -136,22 +150,22 @@ int main (int argc, char* argv[])
 
     count_str = CountStr (code_copy);
 
-    pointers_to_str = (string*) calloc (count_str, sizeof (string));
-
     FillPMassive (pointers_to_str, code_copy, count_str, count_sym);
 
-    Assembling (code_file, code_copy, pointers_to_str, labels, count_str);
+    Assembling (code_file, code_copy, pointers_to_str, labels, label_number, count_str);
 
-    Assembling (code_file, code_copy, pointers_to_str, labels, count_str);
+    Assembling (code_file, code_copy, pointers_to_str, labels, label_number, count_str);
 
     printf ("Assembling succesfull\n");
 
     free (code_copy);
+    free (pointers_to_str);
+    free (labels);
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-unsigned typeOfInput (string s, double* number)
+unsigned typeOfInput (string s, double* number, string label_name)
 {
     assert (s.start != NULL);
 
@@ -161,33 +175,53 @@ unsigned typeOfInput (string s, double* number)
 
     string tmp = {strlen (lexem), lexem};
 
-    if (tmp.len == 2 and tmp.start[0] == ':')
+    for (int i = 0; i < tmp.len; ++i)
     {
-        res = ASSM_LABEL_CODE + tmp.start[1] - '0';
-        return res;
-    }
+        if (isalpha (tmp.start[i]))
+        {
+            if (res == 0 or res == ASSM_COMMAND_CODE)
+                res = ASSM_COMMAND_CODE;
 
-    else
-        for (unsigned i = 0; i < tmp.len; ++i)
-            if (isalpha (tmp.start[i]))
+            else if (res != ASSM_LABEL_CODE)
             {
-                if (res == 0 or res == ASSM_COMMAND_CODE)
-                    res = ASSM_COMMAND_CODE;
-
-                else
-                {
-                    res = ASSM_INPUT_EXCEPTION + ASSM_TYPEOFINPUT_CODE;
-                    return res;       
-                }
-            }
-
-            else 
-            {
-                res = ASSM_INPUT_EXCEPTION + ASSM_TYPEOFINPUT_CODE;
+                res = ASSM_ERROR_CODE;
+                assm_exit_code = ASSM_TYPEOFINPUT_CODE + ASSM_INPUT_EXCEPTION;
                 return res;
             }
+        }
+
+        else if (isdigit (tmp.start[i]))
+        {
+            if (res != ASSM_LABEL_CODE)
+            {
+                res = ASSM_ERROR_CODE;
+                assm_exit_code = ASSM_TYPEOFINPUT_CODE + ASSM_INPUT_EXCEPTION;
+                return res;
+            }
+        }
+
+        else if (tmp.start[i] == ':')
+        {
+            if (res == 0)
+                res = ASSM_LABEL_CODE;
+            else
+            {
+                res = ASSM_ERROR_CODE;
+                assm_exit_code = ASSM_TYPEOFINPUT_CODE + ASSM_INPUT_EXCEPTION;
+                return res;
+            }
+        }
+        
+        else
+        {
+            res = ASSM_ERROR_CODE;
+            assm_exit_code = ASSM_TYPEOFINPUT_CODE + ASSM_INPUT_EXCEPTION;
+            return res;            
+        }
+    }
 
     if (res == ASSM_COMMAND_CODE)
+    {
         for (unsigned i = 0; i < number_commands; ++i)
             if (StrCompare (&tmp, &commands[i].text) == 0)
             {
@@ -195,41 +229,74 @@ unsigned typeOfInput (string s, double* number)
                 break;
             }
 
-    if (res % 256 ==  commands[1].code)             //"push" command code
-    {
-        lexem = strtok (NULL, delim);
+        printf ("%x\n", res);
 
-        sscanf (lexem, "%lf", number);
+        if (res % 256 ==  commands[1].code)             //"push" command code
+        {
+            lexem = strtok (NULL, delim);
 
-        char* tmp_for_copy = (char*) calloc (strlen (lexem), sizeof (char));
+            sscanf (lexem, "%lf", number);
 
-        strcpy (tmp_for_copy, lexem);
+            char* tmp_for_copy = (char*) calloc (strlen (lexem), sizeof (char));
 
-        strcat (s.start, " ");
-        strcat (s.start, tmp_for_copy);
+            strcpy (tmp_for_copy, lexem);
 
-        free (tmp_for_copy);
+            strcat (s.start, " ");
+            strcat (s.start, tmp_for_copy);
+
+            free (tmp_for_copy);
+        }
+
+        if (res % 256 == commands[7].code)              //"jmp" command code
+        {
+            lexem = strtok (NULL, delim);
+
+            char* tmp_for_copy = (char*) calloc (strlen (lexem), sizeof (char));
+
+            strcpy (tmp_for_copy, lexem);
+
+            if (tmp_for_copy[strlen (lexem) - 1] == ':')
+            {
+                tmp_for_copy[strlen (lexem) - 1] = '\0';
+            }
+
+            else
+            {
+                res = ASSM_ERROR_CODE;
+                assm_exit_code = ASSM_INPUT_EXCEPTION + ASSM_TYPEOFINPUT_CODE;
+                return res;
+            }
+
+            label_name.start = (char*) realloc (label_name.start, sizeof (char) * strlen (tmp_for_copy));
+            label_name.len = strlen (tmp_for_copy);
+
+            strcpy (label_name.start, tmp_for_copy);
+
+            strcpy (tmp_for_copy, lexem);
+            
+            strcat (s.start, " ");
+            strcat (s.start, tmp_for_copy);
+
+            free (tmp_for_copy);      
+        }
     }
 
-    if (res % 256 == commands[7].code)              //"jmp" command code
+    if (res == ASSM_LABEL_CODE)
     {
-        lexem = strtok (NULL, delim);
+        if (lexem[0] == ':')
+        {
+            label_name.start = (char*) realloc (label_name.start, sizeof (char) * strlen (lexem + 1));
+            label_name.len   = strlen (lexem + 1); 
 
-        if (strlen (lexem) == 2 and isdigit (lexem[0]) and lexem[1] == ':')
-            res += lexem[0] - '0';
+            strcpy (label_name.start, lexem + 1);
+        }
 
         else
-            res = ASSM_INPUT_EXCEPTION + ASSM_TYPEOFINPUT_CODE;
+        {
+            res = ASSM_ERROR_CODE;
+            assm_exit_code = ASSM_INPUT_EXCEPTION + ASSM_TYPEOFINPUT_CODE;
             return res;
-
-        char* tmp_for_copy = (char*) calloc (strlen (lexem), sizeof (char));
-
-        strcpy (tmp_for_copy, lexem);
-
-        strcat (s.start, " ");
-        strcat (s.start, tmp_for_copy);
-
-        free (tmp_for_copy);      
+        }
     }
 
     return res;
@@ -237,7 +304,8 @@ unsigned typeOfInput (string s, double* number)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void Assembling (char* code_file, char* code_copy, string* str1, int* labels, long int count_str)
+void Assembling (char* code_file, char* code_copy, string* str1, 
+                label* labels, long int label_count, long int count_str)
 {
     assert (code_file);
     assert (code_copy);
@@ -259,13 +327,13 @@ void Assembling (char* code_file, char* code_copy, string* str1, int* labels, lo
 
     double number = 0;
 
+    string label_name = {1, (char*) calloc (1, sizeof (char))};
+
     for (long int i = 0; i < count_str and prog_status; ++i)
     {
-        printf ("st");
+        input = typeOfInput (str1[i], &number, label_name);
 
-        input = typeOfInput (str1[i], &number);
-
-        printf ("a");
+        printf ("%x %lf %s\n", input, number, label_name.start);
 
         first_half = input / 256 * 256;
         second_half = input % 256;
@@ -277,23 +345,40 @@ void Assembling (char* code_file, char* code_copy, string* str1, int* labels, lo
             case ASSM_COMMAND_CODE:
                 CheckExitCode();
 
-                fwrite (&second_half, sizeof (int), 1, f);
+                if (second_half != commands[7].code)
+                    fwrite (&second_half, sizeof (int), 1, f);
 
                 if (second_half == commands[1].code)    //"push" command code
                     fwrite (&number, sizeof (double), 1, f);
                 
-                if (second_half / 16 * 16 == commands[7].code and labels[second_half % 16] != -1) //"jmp" command code
-                    i = labels[second_half % 16] - 1;
+                if (second_half == commands[7].code)    //"jmp" command code
+                {
+                    int label_number = -1;
+
+                    for (int j = 0; j < label_count; ++j)
+                        if (StrCompare (&label_name, &(labels[i].label_name)) == 0)
+                        {
+                            label_number = j;
+                            break;
+                        }
+                        
+                    if (labels[label_number].pointer != -1)
+                        i = labels[label_number].pointer;
+                }
 
                 break;
 
             case ASSM_LABEL_CODE:
-                if (second_half % 256 >= 0 and second_half % 256 < 10)
-                    labels[second_half % 256] = i + 1;
+                labels[label_count].label_name = label_name;
+                labels[label_count].pointer    = i;
 
-                else
+                ++label_count;
+
+                labels = (label*) realloc (labels, sizeof (label) * (label_count + 1));
+
+                if (labels == NULL)
                 {
-                    assm_exit_code = ASSM_ASSEMBLING_CODE + ASSM_INPUT_EXCEPTION;
+                    assm_exit_code = ASSM_ASSEMBLING_CODE + ASSM_ALLOCATION_ERROR;
                     prog_status = 0;
                 }
 
@@ -303,10 +388,7 @@ void Assembling (char* code_file, char* code_copy, string* str1, int* labels, lo
                 assm_exit_code = ASSM_ASSEMBLING_CODE + ASSM_INPUT_EXCEPTION;
                 prog_status = 0;
                 break;
-
         }
-
-        printf ("rt %ld\n", i);
     }
 
     if (fclose (f) != 0)
@@ -314,6 +396,8 @@ void Assembling (char* code_file, char* code_copy, string* str1, int* labels, lo
         assm_exit_code = ASSM_ASSEMBLING_CODE + ASSM_FCLOSE_ERROR;
         return;
     }
+
+    free (label_name.start);
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

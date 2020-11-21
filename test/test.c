@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+#include <ctype.h>
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -9,35 +11,35 @@
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int main ()
+char * strstrci(char const * haystack, char const * needle)
 {
-    char* s = (char*) calloc (100, sizeof (char));
+    char* res = NULL;
+    unsigned k = 0;
 
-    char* delim = (char*) calloc (100, sizeof (char));
+    for (int i = 0; haystack[i]; ++i)
+    {
+        if (tolower (haystack[i]) == tolower (needle[0]))
+            for (int j = 0; needle[j] and haystack[i + j]; ++j)
+            {
+                if (tolower (haystack[i + j]) != tolower (needle[j]))
+                    break;
 
-    char* tmp = (char*) calloc (100, sizeof (char));
+                k = j + 1;
+            }
 
-    strcpy (s, "100 200\0");
-    strcpy  (delim, " \n");
+        if (k == strlen (needle))
+        {
+            res = (char*) haystack + i;
+            break;
+        }
+    }
 
-    printf ("%s\n", s);
+    return res;
+}
 
-    char* lexem  = strtok (s, delim);
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-    printf ("%s\n", lexem);
-
-    lexem = strtok (NULL, delim);
-
-    printf ("%s\n", lexem);
-
-    strcpy (tmp, lexem);
-
-    strcat (s, " ");
-    strcat (s, tmp);
-
-    printf ("%s\n", s);
-
-    free (s);
-    free (delim);
-    free (tmp);
+int main ()
+{  
+    fprintf (stdout, "lol\n");
 }
