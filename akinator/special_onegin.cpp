@@ -4,11 +4,6 @@
 #include <ctype.h>
 #include <locale.h> 
 
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  
-                                                                                      
-#define and &&
-#define or ||
-
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 /*!
@@ -272,41 +267,6 @@ int LettersCmp          (char a, char b);
 */
 
 void Onegin_PrintExitCode ();
-
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-int main (int argc, char* argv[])
-{   
-    assert (argc >= 2);
-
-    long int countStr = 0;
-    long int countSym = 0;
-
-    char* file_for_sort = argv[1];
-    char* sorted_file   = argv[2];
-
-    countSym = CountSymbols (file_for_sort);
-
-    char* file_copy = (char*) calloc (countSym + 2, sizeof(char));                 
-
-    FromFileToStr (file_for_sort, file_copy, countSym);
-
-    countStr = CountStr (file_copy);
-
-    string* pointers_to_str = (string*) calloc (countStr, sizeof (string));
-
-    FillPMassive (pointers_to_str, file_copy, countStr, countSym);
-    
-    QuickSort (pointers_to_str, countStr, sizeof(string), StrCompare);
-
-    FromStrToFile (pointers_to_str, sorted_file, countStr, "w");
-    
-    QuickSort (pointers_to_str, countStr, sizeof(string), StrRevCompare);
-
-    FromStrToFile (pointers_to_str, sorted_file, countStr, "a");
-    
-    OrigStrToFile (file_copy, sorted_file, "a");
-}
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
