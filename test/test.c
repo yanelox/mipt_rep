@@ -40,6 +40,15 @@ char * strstrci(char const * haystack, char const * needle)
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int main ()
-{  
-    fprintf (stdout, "lol\n");
+{
+    double X = 20;
+    int M = 100;
+    double dx = X / M;
+
+    for (double x = X; x > 0; x -= dx)
+        if (x == 2.0)
+        {
+            printf ("lol\n");
+            break;
+        }
 }

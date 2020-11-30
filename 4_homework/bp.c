@@ -8,55 +8,55 @@
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int f (int sum, int* a, int n)
+int compare (const void* a, const void* b)
 {
-    int max = 0;
+    int *a_1 = (int*) a;
+    int *b_1 = (int*) b;
 
-    int k = 0;
+    if (*a_1 > *b_1)
+        return 1;
 
-    int fin_res = 0;
+    else if (*a_1 == *b_1)
+        return 0;
 
-    int* res = (int*) calloc (sum + 1, sizeof (int));
-
-    for (int i = 1; i <= sum; ++i)
-    {
-        max = 0;
-
-        for (int j = 0; j < n; ++j)
-            if ((a[j] != -1) and (i - a[j] >= 0) and (max < res[i - a[j]] + 1))
-            {
-                max = res[i - a[j]] + 1;
-                k = j;
-            }
-
-        a[k] = -1;
-
-        res[i] = max;
-    }
-
-    fin_res = res[sum];
-
-    free (res);
-
-    return fin_res;
+    else 
+        return -1;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int main ()
+int main()
 {
     int sum, n;
 
-    int* a = NULL;
+    int* things;
 
-    scanf ("%d%d", &sum, &n);
+    int tmp_sum = 0, count = 0;
 
-    a = (int*) calloc (n, sizeof (int));
+    int res = scanf ("%d%d", &sum, &n);
+
+    things = (int*) calloc (n, sizeof (int));
 
     for (int i = 0; i < n; ++i)
-        scanf ("%d", a + i);
+        scanf ("%d", things + i);
 
-    printf ("%d\n", f (sum, a, n));
+    qsort (things, n, sizeof (int), compare);
 
-    free (a);
+    for (int i = 0; i < n; ++i)
+    {
+        tmp_sum += things[i];
+
+        if (tmp_sum > sum)
+        {
+            count = i;
+
+            break;
+        }
+
+        count = i + 1;
+    }
+
+    printf ("%d\n", count);
+
+    free (things);
 }
