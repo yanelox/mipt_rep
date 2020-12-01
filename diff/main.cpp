@@ -25,6 +25,10 @@ int main ()
 
     PrintTree (diff_tree);
 
+    diff_tree = TreeSimplification (diff_tree, (TreeEl*) NULL);
+
+    PrintTree (diff_tree);
+
     free (save_copy);
 
     TreeDtor (tree);

@@ -508,3 +508,86 @@ TreeEl* DiffTree (TreeEl* tree, TreeEl* prev)
 
     return res;
 }
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+TreeEl* TreeSimplification (TreeEl* tree, TreeEl* prev)
+{
+    assert (tree);
+
+    TreeEl* new_tree = tree;
+
+    if (tree->left != (TreeEl*) NULL)
+        tree->left = TreeSimplification (tree->left, tree);
+
+    if (tree->right != (TreeEl*) NULL)
+        tree->right = TreeSimplification (tree->right, tree);
+
+    if (tree->type == DIFF_OPERATION_TYPE)
+    {
+        if (tree->value == DIFF_MUL)
+        {
+            if ((tree->left->type  == DIFF_NUMBER_TYPE and tree->left->value  == 0) or
+                (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 0))
+            {
+                new_tree = TreeCtor (DIFF_NUMBER_TYPE, 0, prev);
+
+                TreeDtor (tree);
+            }
+
+            else if (tree->left->type == DIFF_NUMBER_TYPE and tree->left->value == 1)
+            {
+                new_tree = CopyNode (tree->right, prev);
+
+                TreeDtor (tree);
+            }
+
+            else if (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 1)
+            {
+                new_tree = CopyNode (tree->left, prev);
+
+                TreeDtor (tree);
+            }
+        }
+
+        else if (tree->value == DIFF_DIV)
+        {
+            if (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 1)
+            {
+                new_tree = CopyNode (tree->left, prev);
+
+                TreeDtor (tree);
+            }
+        }
+
+        else if (tree->value == DIFF_POW)
+        {
+            if (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 1)
+            {
+                new_tree = CopyNode (tree->left, prev);
+
+                TreeDtor (tree);
+            }
+
+            else if (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 0)
+            {
+                new_tree = TreeCtor (DIFF_NUMBER_TYPE, 1, prev);
+
+                TreeDtor (tree);
+            }
+        }
+
+        else if (tree->value == DIFF_SUM)
+        {
+            if (tree->left->type == DIFF_NUMBER_TYPE and 
+                tree->right->type == DIFF_NUMBER_TYPE)
+            {
+                new_tree = TreeCtor (DIFF_NUMBER_TYPE, tree->left->value + tree->right->value, prev);
+
+                TreeDtor (tree);
+            }
+        }
+    }
+
+    return new_tree;
+}

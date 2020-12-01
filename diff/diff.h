@@ -73,36 +73,40 @@ typedef struct el TreeEl;
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-TreeEl* TreeCtor        (int type, int value, el* prev);
+TreeEl* TreeCtor            (int type, int value, el* prev);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int isoperation         (char sym);
+int isoperation             (char sym);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-char GetOperation       (int num);
+char GetOperation           (int num);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-TreeEl* ReadNode        (TreeEl* prev, char** source);
+TreeEl* ReadNode            (TreeEl* prev, char** source);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-TreeEl* StartReading    (char* source);
+TreeEl* StartReading        (char* source);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void PrintTree          (TreeEl* tree);
+void PrintTree              (TreeEl* tree);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void TreeDtor           (TreeEl* tree);
+void TreeDtor               (TreeEl* tree);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-TreeEl* CopyNode        (TreeEl* source, TreeEl* prev);
+TreeEl* CopyNode            (TreeEl* source, TreeEl* prev);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-TreeEl* DiffTree        (TreeEl* tree, TreeEl* prev);
+TreeEl* DiffTree            (TreeEl* tree, TreeEl* prev);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+TreeEl* TreeSimplification  (TreeEl* tree, TreeEl* prev);
