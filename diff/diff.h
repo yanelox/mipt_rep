@@ -49,7 +49,10 @@ enum diff_operators_codes
     DIFF_MUL    = 0x24,
     DIFF_DIV    = 0x27,
     DIFF_SUB    = 0x29,
-    DIFF_POW    = 0x42
+    DIFF_POW    = 0x42,
+    DIFF_LN     = 0x44,
+    DIFF_COS    = 0x47,
+    DIFF_SIN    = 0x49
 };
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
