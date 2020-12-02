@@ -20,7 +20,8 @@ enum diff_exit_codes
 {
     DIFF_NO_EXCEPTIONS      = 0x00,
     DIFF_ALLOCATION_ERROR   = 0x22,
-    DIFF_INCORRECT_SAVE     = 0x24
+    DIFF_INCORRECT_SAVE     = 0x24,
+    DIFF_FILEOPEN_ERROR     = 0x27
 };
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -110,3 +111,15 @@ TreeEl* DiffTree            (TreeEl* tree, TreeEl* prev);
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 TreeEl* TreeSimplification  (TreeEl* tree, TreeEl* prev);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void SaveNodeL              (TreeEl* tree, FILE* doc);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void StartLSaving           (TreeEl* tree, FILE* doc);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void MakeLFile              (TreeEl* tree, TreeEl* diff_tree, char* file_name);

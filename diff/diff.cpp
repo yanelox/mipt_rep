@@ -525,69 +525,326 @@ TreeEl* TreeSimplification (TreeEl* tree, TreeEl* prev)
 
     if (tree->type == DIFF_OPERATION_TYPE)
     {
-        if (tree->value == DIFF_MUL)
+        switch (tree->value)
         {
-            if ((tree->left->type  == DIFF_NUMBER_TYPE and tree->left->value  == 0) or
-                (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 0))
+            case DIFF_MUL:
             {
-                new_tree = TreeCtor (DIFF_NUMBER_TYPE, 0, prev);
+                if ((tree->left->type  == DIFF_NUMBER_TYPE and tree->left->value  == 0) or
+                    (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 0))
+                {
+                    new_tree = TreeCtor (DIFF_NUMBER_TYPE, 0, prev);
 
-                TreeDtor (tree);
+                    TreeDtor (tree);
+                }
+
+                else if (tree->left->type == DIFF_NUMBER_TYPE and tree->left->value == 1)
+                {
+                    new_tree = CopyNode (tree->right, prev);
+
+                    TreeDtor (tree);
+                }
+
+                else if (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 1)
+                {
+                    new_tree = CopyNode (tree->left, prev);
+
+                    TreeDtor (tree);
+                }
+
+                break;
             }
 
-            else if (tree->left->type == DIFF_NUMBER_TYPE and tree->left->value == 1)
+            case DIFF_DIV:
             {
-                new_tree = CopyNode (tree->right, prev);
+                if (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 1)
+                {
+                    new_tree = CopyNode (tree->left, prev);
 
-                TreeDtor (tree);
+                    TreeDtor (tree);
+                }
+
+                break;
             }
 
-            else if (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 1)
+            case DIFF_POW:
             {
-                new_tree = CopyNode (tree->left, prev);
+                if (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 1)
+                {
+                    new_tree = CopyNode (tree->left, prev);
 
-                TreeDtor (tree);
-            }
-        }
+                    TreeDtor (tree);
+                }
 
-        else if (tree->value == DIFF_DIV)
-        {
-            if (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 1)
-            {
-                new_tree = CopyNode (tree->left, prev);
+                else if (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 0)
+                {
+                    new_tree = TreeCtor (DIFF_NUMBER_TYPE, 1, prev);
 
-                TreeDtor (tree);
-            }
-        }
+                    TreeDtor (tree);
+                }
 
-        else if (tree->value == DIFF_POW)
-        {
-            if (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 1)
-            {
-                new_tree = CopyNode (tree->left, prev);
-
-                TreeDtor (tree);
+                break;
             }
 
-            else if (tree->right->type == DIFF_NUMBER_TYPE and tree->right->value == 0)
+            case DIFF_SUM:
             {
-                new_tree = TreeCtor (DIFF_NUMBER_TYPE, 1, prev);
+                if (tree->left->type == DIFF_NUMBER_TYPE and 
+                    tree->right->type == DIFF_NUMBER_TYPE)
+                {
+                    new_tree = TreeCtor (DIFF_NUMBER_TYPE, tree->left->value + tree->right->value, prev);
 
-                TreeDtor (tree);
+                    TreeDtor (tree);
+                }
+
+                else if (tree->left->type == DIFF_NUMBER_TYPE and
+                         tree->left->value == 0)
+                {
+                    new_tree = CopyNode (tree->right, prev);
+
+                    TreeDtor (tree);
+                }
+
+                else if (tree->right->type == DIFF_NUMBER_TYPE and
+                         tree->right->value == 0)
+                {
+                    new_tree == CopyNode (tree->left, prev);
+
+                    TreeDtor (tree);
+                }
+
+                break;
             }
-        }
 
-        else if (tree->value == DIFF_SUM)
-        {
-            if (tree->left->type == DIFF_NUMBER_TYPE and 
-                tree->right->type == DIFF_NUMBER_TYPE)
-            {
-                new_tree = TreeCtor (DIFF_NUMBER_TYPE, tree->left->value + tree->right->value, prev);
-
-                TreeDtor (tree);
-            }
+            default:
+                break;
         }
     }
 
     return new_tree;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void SaveNodeL (TreeEl* tree, FILE* doc)
+{
+    assert (tree);
+    assert (doc);
+    
+    switch (tree->type)
+    {
+        case DIFF_OPERATION_TYPE:
+        {
+            switch (tree->value)
+            {
+                case DIFF_SUM:
+                {
+                    SaveNodeL (tree->left, doc);
+                    
+                    fprintf (doc, " + ");
+                    
+                    SaveNodeL (tree->right, doc);
+
+                    break;
+                }
+
+                case DIFF_MUL:
+                {
+                    if (tree->left->type == DIFF_OPERATION_TYPE and
+                        (tree->left->value == DIFF_SUM or tree->left->value == DIFF_SUB))
+                    {
+                        fprintf (doc, "\\left( ");
+                        
+                        SaveNodeL (tree->left, doc);
+
+                        fprintf (doc, "\\right) ");
+                    }
+
+                    else
+                        SaveNodeL (tree->left, doc);
+
+                    fprintf (doc, "\\cdot ");
+
+                    if (tree->right->type == DIFF_OPERATION_TYPE and
+                        (tree->right->value == DIFF_SUM or tree->right->value == DIFF_SUB))
+                    {
+                        fprintf (doc, "\\left( ");
+
+                        SaveNodeL (tree->right, doc);
+
+                        fprintf (doc, "\\right) ");
+                    }
+
+                    else
+                        SaveNodeL (tree->right, doc);
+
+                    break;   
+                }
+
+                case DIFF_DIV:
+                {
+                    fprintf (doc, "\\dfrac{");
+
+                    SaveNodeL (tree->left, doc);
+
+                    fprintf (doc, "}{");
+
+                    SaveNodeL (tree->right, doc);
+
+                    fprintf (doc, "} ");
+
+                    break;
+                }
+
+                case DIFF_SUB:
+                {
+                    SaveNodeL (tree->left, doc);
+
+                    fprintf (doc, " - ");
+                    
+                    SaveNodeL (tree->right, doc);
+
+                    break;
+                }
+
+                case DIFF_POW:
+                {
+                    if (tree->left->type == DIFF_OPERATION_TYPE)
+                    {
+                        fprintf (doc, "\\left( ");
+                        SaveNodeL (tree->left, doc);
+                        fprintf (doc, "\\right) ");
+                    }
+
+                    else
+                        SaveNodeL (tree->left, doc);
+
+                    fprintf (doc, "^{");
+
+                    SaveNodeL (tree->right, doc);
+
+                    fprintf (doc, "}");
+
+                    break;
+                }
+
+                case DIFF_LN:
+                {
+                    fprintf (doc, "\\ln (");
+                    
+                    SaveNodeL (tree->left, doc);
+
+                    fprintf (doc, ") ");
+
+                    break;
+                }
+
+                case DIFF_COS:
+                {
+                    fprintf (doc, "\\cos (");
+                    
+                    SaveNodeL (tree->left, doc);
+
+                    fprintf (doc, ") ");   
+
+                    break;             
+                }
+
+                case DIFF_SIN:
+                {
+                    fprintf (doc, "\\sin (");
+                    
+                    SaveNodeL (tree->left, doc);
+
+                    fprintf (doc, ")");
+
+                    break;
+                }
+
+                default:
+                    break;
+            }
+
+            break;
+        }
+
+        case DIFF_NUMBER_TYPE:
+        {
+            fprintf (doc, "%d", tree->value);
+
+            break;
+        }
+
+        case DIFF_VARIABLE_TYPE:
+        {
+            fprintf (doc, "%c", tree->value);
+
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void StartLSaving (TreeEl* tree, FILE* doc)
+{
+    assert (tree);
+    assert (doc);
+
+    fprintf (doc, "$");
+
+    SaveNodeL (tree, doc);
+
+    fprintf (doc, "$");
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void MakeLFile (TreeEl* tree, TreeEl* diff_tree, char* file_name)
+{
+    assert (tree);
+    assert (diff_tree);
+    assert (file_name);
+
+    FILE* f = fopen (file_name, "w");
+ 
+    fprintf (f, "\\documentclass[12pt,a4paper,fleqn]{article}\n");
+    fprintf (f, "\\usepackage[utf8]{inputenc}\n");
+    fprintf (f, "\\usepackage{amssymb, amsmath, multicol}\n");
+    fprintf (f, "\\usepackage[russian]{babel}\n");
+    fprintf (f, "\\usepackage{graphicx}\n");
+    fprintf (f, "\\graphicspath{{pictures/}}\n");
+    fprintf (f, "\\DeclareGraphicsExtensions{.pdf,.png,.jpg}\n");
+    fprintf (f, "\\usepackage[shortcuts,cyremdash]{extdash}\n");
+    fprintf (f, "\\usepackage{wrapfig}\n");
+    fprintf (f, "\\usepackage{floatflt}\n");
+    fprintf (f, "\\usepackage{lipsum}\n");
+    fprintf (f,"\\usepackage{concmath}\n");    
+    fprintf (f, "\\usepackage{euler}\n");
+    fprintf (f, "\\usepackage{tikz}\n");
+    fprintf (f, "\\usetikzlibrary{graphs}\n\n");
+    fprintf (f, "\\oddsidemargin=-15.4mm\n");
+    fprintf (f, "\\textwidth=190mm\n");
+    fprintf (f, "\\headheight=-32.4mm\n");
+    fprintf (f, "\\textheight=277mm\n");
+    fprintf (f, "\\tolerance=100\n");
+    fprintf (f, "\\parindent=0pt\n");
+    fprintf (f, "\\parskip=8pt\n");
+    fprintf (f, "\\pagestyle{empty}\n");
+    fprintf (f, "\\renewcommand{\\tg}{\\mathop{\\mathrm{tg}}\\nolimits}\n");
+    fprintf (f, "\\renewcommand{\\ctg}{\\mathop{\\mathrm{ctg}}\\nolimits}\n");
+    fprintf (f, "\\renewcommand{\\arctan}{\\mathop{\\mathrm{arctg}}\\nolimits}\n");
+    fprintf (f, "\\newcommand{\\divisible}{\\mathop{\\raisebox{-2pt}{\\vdots}}}\n\n\n");
+    fprintf (f, "\\begin{document}\n");
+
+    StartLSaving (tree, f);
+
+    fprintf (f, "\\newline\n");
+
+    StartLSaving (diff_tree, f);
+
+    fprintf (f, "\n\\end{document}");
+
+    fclose (f);
 }

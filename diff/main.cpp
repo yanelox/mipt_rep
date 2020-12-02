@@ -6,10 +6,12 @@
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int main ()
+int main (int argc, char* argv[])
 {
-    char* save     = (char*) "save.txt";
-    char* tex_save = (char*) "tex_save.txt";
+    assert (argc == 3);
+
+    char* save     = argv[1];
+    char* tex_save = argv[2];
 
     int count_sym = CountSymbols (save);
 
@@ -28,6 +30,8 @@ int main ()
     diff_tree = TreeSimplification (diff_tree, (TreeEl*) NULL);
 
     PrintTree (diff_tree);
+
+    MakeLFile (tree, diff_tree, tex_save);
 
     free (save_copy);
 
