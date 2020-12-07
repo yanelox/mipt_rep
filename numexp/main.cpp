@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -12,6 +13,10 @@ int GetE    (char** cur_p);
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int GetT    (char** cur_p);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int GetS    (char** cur_p);
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -83,7 +88,7 @@ int GetT (char** cur_p)
     assert (cur_p);
     assert (*cur_p);
 
-    int res = GetP (cur_p);
+    int res = GetS (cur_p);
 
     while (**cur_p == '*' or **cur_p == '/')
     {
@@ -97,16 +102,36 @@ int GetT (char** cur_p)
         (*cur_p)++;
 
         if (val == 1)
-            res *= GetP (cur_p);
+            res *= GetS (cur_p);
 
         else
-            res /= GetP (cur_p);
+            res /= GetS (cur_p);
     }
 
     return res;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int GetS (char** cur_p)
+{
+    assert (cur_p);
+    assert (*cur_p);
+
+    int res = GetP (cur_p);
+
+    if (**cur_p == '^')
+    {
+        (*cur_p)++;
+
+        res = pow (res, GetP (cur_p));
+    }
+    
+    return res;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 
 int GetP (char** cur_p)
 {
