@@ -11,44 +11,98 @@
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-char * strstrci(char const * haystack, char const * needle)
+struct dl
 {
-    char* res = NULL;
-    unsigned k = 0;
+    struct dl* next;
+    struct dl* prev;
 
-    for (int i = 0; haystack[i]; ++i)
-    {
-        if (tolower (haystack[i]) == tolower (needle[0]))
-            for (int j = 0; needle[j] and haystack[i + j]; ++j)
-            {
-                if (tolower (haystack[i + j]) != tolower (needle[j]))
-                    break;
+    int data;
+};
 
-                k = j + 1;
-            }
+typedef struct dl d_list;
 
-        if (k == strlen (needle))
-        {
-            res = (char*) haystack + i;
-            break;
-        }
-    }
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+d_list* DListCtor (int data)
+{
+    d_list* res = (d_list*) calloc (1, sizeof (d_list));
+
+    res->data = data;
 
     return res;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
+void DListDtor (d_list* list)
+{
+    assert (list);
+
+    d_list* tmp = list;
+
+    while (list)
+    {
+        tmp = list;
+
+        list = list->next;
+
+        free (tmp);
+    }
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void DListPrint (d_list* list)
+{
+    assert (list);
+
+    while (list)
+    {
+        printf ("%d\n", list->data);
+
+        list = list->next;
+    }
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+d_list* DListRead (char* file_name)
+{
+    assert (file_name);
+
+    FILE* f = fopen (file_name, "r");
+
+    d_list* res = NULL;
+    d_list** cur = &res;
+    d_list* prev = NULL;
+
+    int input = 0;
+
+    while (EOF != fscanf (f, "%d", &input))
+    {
+        (*cur) = DListCtor (input);
+        (*cur)->prev = prev;
+
+        prev = *cur;
+        cur = &((*cur)->next);
+    }
+
+    fclose (f);
+
+    return res;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+d_list* DListReverse
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 int main ()
 {
-    double X = 20;
-    int M = 100;
-    double dx = X / M;
+    d_list* list = DListRead ("test.txt");
 
-    for (double x = X; x > 0; x -= dx)
-        if (x == 2.0)
-        {
-            printf ("lol\n");
-            break;
-        }
+    DListPrint (list);
+
+    DListDtor (list);
 }
