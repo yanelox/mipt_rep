@@ -263,46 +263,190 @@ void PrintTree (TreeEl* tree)
 {
     assert (tree);
 
-    printf ("(");
-
-    if (tree->type == DIFF_OPERATION_TYPE)
+    switch (tree->type)
     {
-        if (tree->value == DIFF_LN)
+        case DIFF_OPERATION_TYPE:
         {
-            printf ("ln");
-            PrintTree (tree->left);          
+            switch (tree->value)
+            {
+                case DIFF_SUM:
+                {
+                    PrintTree (tree->left);
+                    
+                    printf (" + ");
+                    
+                    PrintTree (tree->right);
+
+                    break;
+                }
+
+                case DIFF_MUL:
+                {
+                    if (tree->left->type == DIFF_OPERATION_TYPE and
+                        (tree->left->value == DIFF_SUM or tree->left->value == DIFF_SUB))
+                    {
+                        printf ("(");
+                        
+                        PrintTree (tree->left);
+
+                        printf (")");
+                    }
+
+                    else
+                        PrintTree (tree->left);
+
+                    printf ("*");
+
+                    if (tree->right->type == DIFF_OPERATION_TYPE and
+                        (tree->right->value == DIFF_SUM or tree->right->value == DIFF_SUB))
+                    {
+                        printf ("(");
+
+                        PrintTree (tree->right);
+
+                        printf (")");
+                    }
+
+                    else
+                        PrintTree (tree->right);
+
+                    break;   
+                }
+
+                case DIFF_DIV:
+                {
+                    if (tree->left->type == DIFF_OPERATION_TYPE and
+                        tree->left->value != DIFF_LN and tree->left->value != DIFF_SIN and
+                        tree->left->value != DIFF_COS)
+                    {
+                        printf ("(");
+
+                        PrintTree (tree->left);
+
+                        printf (")");
+                    }
+                    
+                    else
+                        PrintTree (tree->left);
+
+                    printf ("/");
+
+                    if (tree->right->type == DIFF_OPERATION_TYPE and
+                        tree->right->value != DIFF_LN and tree->right->value != DIFF_SIN and
+                        tree->right->value != DIFF_COS)
+                    {
+                        printf ("(");
+
+                        PrintTree (tree->right);
+
+                        printf (")");
+                    }
+                    
+                    else
+                        PrintTree (tree->right);                   
+
+                    break;
+                }
+
+                case DIFF_SUB:
+                {
+                    PrintTree (tree->left);
+
+                    printf (" - ");
+                    
+                    PrintTree (tree->right);
+
+                    break;
+                }
+
+                case DIFF_POW:
+                {
+                    if (tree->left->type == DIFF_OPERATION_TYPE)
+                    {
+                        printf ("(");
+
+                        PrintTree (tree->left);
+
+                        printf (")");
+                    }
+                    
+                    else
+                        PrintTree (tree->left);
+
+                    printf ("^");
+
+                    if (tree->right->type == DIFF_OPERATION_TYPE)
+                    {
+                        printf ("(");
+
+                        PrintTree (tree->right);
+
+                        printf (")");
+                    }
+
+                    else
+                        PrintTree (tree->right);
+
+                    break;
+                }
+
+                case DIFF_LN:
+                {
+                    printf ("ln(");
+                    
+                    PrintTree (tree->left);
+
+                    printf (")");
+
+                    break;
+                }
+
+                case DIFF_COS:
+                {
+                    printf ("cos(");
+                    
+                    PrintTree (tree->left);
+
+                    printf (")");   
+
+                    break;             
+                }
+
+                case DIFF_SIN:
+                {
+                    printf ("sin(");
+                    
+                    PrintTree (tree->left);
+
+                    printf (")");
+
+                    break;
+                }
+
+                default:
+                    break;
+            }
+
+            break;
         }
 
-        else if (tree->value == DIFF_COS)
+        case DIFF_NUMBER_TYPE:
         {
-            printf ("cos");
-            PrintTree (tree->left);
+            printf ("%d", tree->value);
+
+            break;
         }
 
-        else if (tree->value == DIFF_SIN)
+        case DIFF_VARIABLE_TYPE:
         {
-            printf ("sin");
-            PrintTree (tree->left);
+            printf ("%c", tree->value);
+
+            break;
         }
 
-        else
-        {
-            PrintTree (tree->left);
-            printf("%c", GetOperation (tree->value));
-            PrintTree (tree->right);
-        }
+        default:
+            break;
     }
-
-    else if (tree->type == DIFF_VARIABLE_TYPE)
-        printf ("%c", tree->value);
-
-    else if (tree->type == DIFF_NUMBER_TYPE)
-        printf ("%d", tree->value);
-
-    else
-        return;
-
-    printf (")");
 
     if (tree->prev == (TreeEl*) NULL)
         printf ("\n");
@@ -847,4 +991,244 @@ void MakeLFile (TreeEl* tree, TreeEl* diff_tree, char* file_name)
     fprintf (f, "\n\\end{document}");
 
     fclose (f);
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+TreeEl* GetG (char* str)
+{
+    assert (str);
+
+    char* cur_p = str;
+
+    TreeEl* res = GetE ((TreeEl*) NULL, &cur_p);
+
+    if (*cur_p == '$')
+        return res;
+
+    else
+        return (TreeEl*) NULL;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+TreeEl* GetE (TreeEl* prev, char** cur_p)
+{
+    assert (cur_p);
+    assert (*cur_p);
+
+    TreeEl* res_t = GetT (prev, cur_p);
+    TreeEl* res_e = res_t;
+    TreeEl* left = NULL;
+    TreeEl* chg_node = res_e;
+
+    while (**cur_p == '+' or **cur_p == '-')
+    {
+        int val = 0;
+
+        if (**cur_p == '+')
+            val = 1;
+
+        else
+            val = -1;
+
+        (*cur_p)++;
+
+        left = CopyNode (chg_node, chg_node);
+
+        chg_node->type = DIFF_OPERATION_TYPE;
+
+        if (val == 1)
+            chg_node->value = DIFF_SUM;
+        else
+            chg_node->value = DIFF_SUB;
+
+        chg_node->left = left;
+        chg_node->right = GetT (chg_node, cur_p);
+
+        chg_node = chg_node->right;
+    }
+
+    return res_e;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+TreeEl* GetT (TreeEl* prev, char** cur_p)
+{
+    assert (cur_p);
+    assert (*cur_p);
+
+    TreeEl* res_s = GetS (prev, cur_p);
+    TreeEl* res_t = res_s;
+    TreeEl* left = NULL;
+    TreeEl* chg_node = res_t;
+
+    while (**cur_p == '*' or **cur_p == '/')
+    {
+        int val = 0;
+
+        if (**cur_p == '*')
+            val = 1;
+        else
+            val = -1;
+
+        (*cur_p)++;
+
+        left = CopyNode (chg_node, chg_node);
+        
+        chg_node->type = DIFF_OPERATION_TYPE;
+
+        if (val == 1)
+            chg_node->value = DIFF_MUL;
+        else
+            chg_node->value = DIFF_DIV;
+
+        chg_node->left = left;
+        chg_node->right = GetS (chg_node, cur_p);
+
+        chg_node = chg_node->right;
+    }
+
+    return res_t;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+TreeEl* GetS (TreeEl* prev, char** cur_p)
+{
+    assert (cur_p);
+    assert (*cur_p);
+
+    TreeEl* res_p = GetP (prev, cur_p);
+    TreeEl* res_s = res_p;
+    TreeEl* left = NULL;
+    TreeEl* chg_node = res_s;
+
+    if (**cur_p == '^')
+    {
+        (*cur_p)++;
+
+        left = CopyNode (chg_node, chg_node);
+
+        chg_node->type = DIFF_OPERATION_TYPE;
+        chg_node->value = DIFF_POW;
+
+        chg_node->left = left;
+        chg_node->right = GetP (chg_node, cur_p);
+
+        chg_node = chg_node->right;
+    }
+    
+    return res_s;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+
+TreeEl* GetP (TreeEl* prev, char** cur_p)
+{
+    assert (cur_p);
+    assert (*cur_p);
+
+    TreeEl* res_p = NULL;
+
+    if (**cur_p == '(')
+    {
+        (*cur_p)++;
+
+        res_p = GetE (prev, cur_p);
+
+        if (**cur_p != ')')
+            return (TreeEl*) NULL;
+
+        (*cur_p)++;
+    }
+
+    else if (isalpha (**cur_p))
+    {
+        if (**cur_p == 's' and *(*cur_p + 1) == 'i' and *(*cur_p + 2) == 'n' and *(*cur_p + 3) == '(')
+        {
+            (*cur_p) += 4;
+
+            res_p = TreeCtor (DIFF_OPERATION_TYPE, DIFF_SIN, prev);
+            res_p->left = GetE (res_p, cur_p);
+
+            if (**cur_p != ')')
+                return (TreeEl*) NULL;   
+
+            (*cur_p)++;         
+        }
+
+        else if (**cur_p == 'c' and *(*cur_p + 1) == 'o' and *(*cur_p + 2) == 's' and *(*cur_p + 3) == '(')
+        {
+            (*cur_p) += 4;
+
+            res_p = TreeCtor (DIFF_OPERATION_TYPE, DIFF_COS, prev);
+            res_p->left = GetE (res_p, cur_p);
+
+            if (**cur_p != ')')
+                return (TreeEl*) NULL;
+
+            (*cur_p)++;         
+        }
+
+        else if (**cur_p == 'l' and *(*cur_p + 1) == 'n' and *(*cur_p + 2) == '(')
+        {
+            (*cur_p) += 3;
+
+            res_p = TreeCtor (DIFF_OPERATION_TYPE, DIFF_LN, prev);
+            res_p->left = GetE (res_p, cur_p);
+
+            if (**cur_p != ')')
+                return (TreeEl*) NULL;
+
+            (*cur_p)++;
+        }
+
+        else
+        {
+            res_p = GetN (prev, cur_p);
+        }
+    }
+    
+    else
+    {
+        res_p = GetN (prev, cur_p);
+    }
+
+    return res_p;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+TreeEl* GetN (TreeEl* prev, char** cur_p)
+{
+    assert (cur_p);
+    assert (*cur_p);
+
+    TreeEl* res_n = TreeCtor (DIFF_NUMBER_TYPE, 0, prev);
+    int res = 0;
+
+    if (isdigit (**cur_p))
+    {
+        while (**cur_p >= '0' and **cur_p <= '9')
+        {
+            res = res * 10 + **cur_p - '0';
+
+            (*cur_p)++;
+        }
+
+        res_n->value = res;
+    }
+
+    else if (isalpha (**cur_p))
+    {
+        res_n->type = DIFF_VARIABLE_TYPE;
+        res_n->value = (int) **cur_p;
+
+        (*cur_p)++;
+    }
+
+    return res_n;
 }
