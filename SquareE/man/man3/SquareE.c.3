@@ -1,0 +1,201 @@
+.TH "SquareE.c" 3 "Wed Oct 7 2020" "SquareC" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+SquareE.c
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdio\&.h>\fP
+.br
+\fC#include <math\&.h>\fP
+.br
+\fC#include <assert\&.h>\fP
+.br
+\fC#include <errno\&.h>\fP
+.br
+
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBand\fP   &&"
+.br
+.ti -1c
+.RI "#define \fBor\fP   ||"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBequation_solver_return_values\fP { \fBZERO_ROOTS\fP = 0, \fBONE_ROOT\fP = 1, \fBTWO_ROOTS\fP = 2, \fBINFINITY_ROOTS\fP = 42, \fBDISC_OUT_OF_RANGE\fP = ERANGE }"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBEquationSolver\fP (double a, double b, double c, double *x1, double *x2)"
+.br
+.ti -1c
+.RI "void \fBEquationSolver_test\fP (FILE *fp)"
+.br
+.ti -1c
+.RI "int \fBIsZero\fP (double a)"
+.br
+.ti -1c
+.RI "void \fBInput_Coef\fP (char a[], double *n)"
+.br
+.ti -1c
+.RI "int \fBChooseMode\fP (void)"
+.br
+.ti -1c
+.RI "int \fBmain\fP ()"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "const double \fBACCURACY\fP = 1e\-6"
+.br
+.in -1c
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define and   &&"
+
+.PP
+Definition at line 8 of file SquareE\&.c\&.
+.SS "#define or   ||"
+
+.PP
+Definition at line 9 of file SquareE\&.c\&.
+.SH "Enumeration Type Documentation"
+.PP 
+.SS "enum \fBequation_solver_return_values\fP"
+Enumeration of values which can be returned by 'EquationSolver' func 
+.PP
+\fBEnumerator\fP
+.in +1c
+.TP
+\fB\fIZERO_ROOTS \fP\fP
+.TP
+\fB\fIONE_ROOT \fP\fP
+.TP
+\fB\fITWO_ROOTS \fP\fP
+.TP
+\fB\fIINFINITY_ROOTS \fP\fP
+.TP
+\fB\fIDISC_OUT_OF_RANGE \fP\fP
+.PP
+Definition at line 39 of file SquareE\&.c\&.
+.SH "Function Documentation"
+.PP 
+.SS "int ChooseMode (void)"
+Choosing of working mode
+.PP
+\fBNote\fP
+.RS 4
+Asked for int value, 0 if you want to work in test mode or 1 if you wat to work in solver mode 
+.RE
+.PP
+
+.PP
+Definition at line 315 of file SquareE\&.c\&.
+.SS "int EquationSolver (double a, double b, double c, double * x1, double * x2)"
+Solves a square equation like ax^2 + bx + c = 0
+.PP
+\fBParameters\fP
+.RS 4
+\fIa\fP a - coefficient 
+.br
+\fIb\fP b - coeffecient 
+.br
+\fIc\fP c - coefficient
+.br
+\fIx1\fP Pointer to variable of first root of equation 
+.br
+\fIx2\fP Pointer to variable of second root of equation
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Count of solutions
+.RE
+.PP
+\fBNote\fP
+.RS 4
+.IP "\(bu" 2
+Returns NUMBER_INF_COUNT in case of infinity count of roots
+.IP "\(bu" 2
+If equation have only one solution, it will be saved in x1 and x2 
+.PP
+.RE
+.PP
+
+.PP
+Definition at line 183 of file SquareE\&.c\&.
+.SS "void EquationSolver_test (FILE * fp)"
+Test an 'EquationSolver' function
+.PP
+\fBParameters\fP
+.RS 4
+\fIfp\fP Variable with type FILE* which contains information about file-name with test values
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Print 'OK' if test complete succesfully and 'FALSE' and information about error in case of some errors 
+.RE
+.PP
+
+.PP
+Definition at line 237 of file SquareE\&.c\&.
+.SS "void Input_Coef (char a[], double * n)"
+Input 1 double value
+.PP
+\fBParameters\fP
+.RS 4
+\fIn\fP Pointer to value which you want to input 
+.br
+\fIa\fP String which will be printed before input in format: 'Please, input (a):'
+.RE
+.PP
+\fBNote\fP
+.RS 4
+There is checking for type of input value\&. If you input incorrect you will be asked to input value again 
+.RE
+.PP
+
+.PP
+Definition at line 294 of file SquareE\&.c\&.
+.SS "int IsZero (double a)"
+Compares values with zero with some accuracy
+.PP
+\fBParameters\fP
+.RS 4
+\fIa\fP Value which we want to compare
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+1 if number is comparable with zero with accuracy and 0 if it is not 
+.RE
+.PP
+
+.PP
+Definition at line 287 of file SquareE\&.c\&.
+.SS "int main ()"
+
+.PP
+Definition at line 122 of file SquareE\&.c\&.
+.SH "Variable Documentation"
+.PP 
+.SS "const double ACCURACY = 1e\-6"
+Accuracy of comparing values with zero\&. It is used in \fBIsZero()\fP function 
+.PP
+Definition at line 56 of file SquareE\&.c\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for SquareC from the source code\&.
