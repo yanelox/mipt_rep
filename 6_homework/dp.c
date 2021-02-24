@@ -6,7 +6,7 @@
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int con = 10;
-float eps = 0.00000000000001;
+float eps = 0.000001;
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -148,17 +148,20 @@ int main ()
 
     srand (time (NULL));
 
-    scanf ("%g%d", &det, &n);
+    scanf ("%d", &n);
 
     a = calloc (n * n, sizeof (float));
 
-    gen_m (a, n, det);
+    for (int i = 0; i < n * n; ++i)
+        scanf ("%f", a + i);
 
-    rand_m (a, n);
+    // gen_m (a, n, det);
+
+    // rand_m (a, n);
 
     // print_m (a, n);
 
-    res_det = f_det (a, n);
+    // res_det = f_det (a, n);
 
     printf ("%lg\n", res_det);   
 
