@@ -14,7 +14,7 @@ typedef struct t
     struct t* right;
     int data;
 } node;
-
+//da
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 node* make_tree (int n, int* p, int* i)

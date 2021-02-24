@@ -6,19 +6,19 @@
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int con = 10;
-float eps = 0.000001;
+float eps = 0.0001;
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 float* gen_m (float* a, int n, float det)
 {
     for (int i = 0; i < n; ++i)
-    for (int j = 0; j < n; ++j)
-        if (i == j)
-            a[i * n + j] = 1;
+        for (int j = 0; j < n; ++j)
+            if (i == j)
+                a[i * n + j] = 1;
 
-        else if (j > i)
-            a[i * n + j] = rand () % con;
+            else if (j > i)
+                a[i * n + j] = rand () % con;
 
     a[n * n - 1] = det;
 
@@ -51,6 +51,8 @@ float* rand_m (float* a, int n)
 
 float print_m (float* a, int n)
 {
+    printf ("\n");
+
     for (int i = 0; i < n; ++i)
     {
         for (int j = 0; j < n; ++j)
@@ -70,26 +72,26 @@ float f_det (float* a, int n)
 {
     int k_m, j_m;
 
-    float max = a[0];
+    float max = fabs (a[0]);
 
     float swap = 0;
 
     float res = 1;
 
-    // printf ("%lg\n", a[n * n - 1]);
-
     for (int i = 0; i < n - 1; ++i)
     {
-        max = a[i * n + i];
+        max = fabs (a[i * n + i]);
+        k_m = i;
+        j_m = i;
 
         for (int j = i; j < n; ++j)
-        for (int k = i; k < n; ++k)
-            if (a[j * n + k] > max)
-            {
-                max = a[j * n + k];
-                j_m = j;
-                k_m = k;
-            }
+            for (int k = i; k < n; ++k)
+                if (fabs (a[j * n + k]) > max)
+                {
+                    max = fabs (a[j * n + k]);
+                    j_m = j;
+                    k_m = k;
+                }
 
         for (int j = 0; j < n; ++j)
         {
@@ -105,10 +107,12 @@ float f_det (float* a, int n)
             a[j * n + k_m] = swap;
         }
 
+        printf ("//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+        print_m (a, n);
+
         if (abs (a[i * n + i]) < eps)
         {
-            printf ("\n1-%lg\n", fabs (a[n * n - 1]));
-            return 6.66;
+            return 0;
         }
 
         for (int j = i + 1; j < n; ++j)
@@ -119,13 +123,13 @@ float f_det (float* a, int n)
                 a[j * n + k] -= coef * a[i * n + k];
         }
 
-        // print_m (a, n);
+        print_m (a, n);
+        printf ("//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
     }
 
     if (fabs (a[n * n - 1]) < eps)
     {
-        printf ("\n2-%lg\n", fabs (a[n * n - 1]));
-        return 6.66;
+        return 0;
     }
 
     for (int i = 0; i < n; ++i)
@@ -141,8 +145,6 @@ int main ()
     int n;
 
     float* a = NULL;
-
-    float det;
 
     float res_det = 0;
 
@@ -161,7 +163,7 @@ int main ()
 
     // print_m (a, n);
 
-    // res_det = f_det (a, n);
+    res_det = f_det (a, n);
 
     printf ("%lg\n", res_det);   
 
