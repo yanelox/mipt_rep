@@ -64,21 +64,27 @@ int print_tree (node* t)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int print_top (node* t)
+int print_top (node* t, int* n, int size)
 {
     printf ("1 ");
 
     if (t->left != NULL)
-        print_top (t->left);
+        print_top (t->left, n, size);
 
-    else
+    else if (*n < size)
+    {
         printf ("0 ");
+        ++*n;
+    }
 
     if (t->right != NULL)
-        print_top (t->right);
+        print_top (t->right, n, size);
 
-    else
+    else if (*n < size)
+    {
         printf ("0 ");
+        ++*n;
+    }
 
     return 0;
 }
@@ -91,6 +97,8 @@ int main ()
     int* p = NULL;
     int* i = NULL;
     node* res = NULL;
+    int* top = calloc (1, sizeof (int));
+    int tmp = 0;
 
     scanf ("%d", &n);
 
@@ -105,10 +113,15 @@ int main ()
 
     res = make_tree (n, p, i);
 
-    print_top (res);
+    printf ("%d\n", n);
+
+    print_top (res, &tmp, n);
+
+    printf ("\n");
 
     print_tree (res);
 
     free (i);
     free (p);
+    free (top);
 }
