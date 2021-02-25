@@ -3,11 +3,6 @@
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-#define and &&
-#define or ||
-
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
 typedef struct t
 {
     struct t* left;
@@ -17,34 +12,50 @@ typedef struct t
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-node* make_tree (int n, int* p, int* i)
+int add_el (int el, node* tree)
 {
-    int j = 0;
-
-    node* res = calloc (1, sizeof (node));
-
-    if (n == 0)
+    if (el < tree->data)
     {
-        return NULL;
+        if (tree->left != NULL)
+            add_el (el, tree->left);
+
+        else
+        {
+            tree->left = calloc (1, sizeof (node));
+
+            tree->left->data = el;
+        }
     }
 
-    if (n == 1)
+    else
     {
-        res->data = p[0];
+        if (tree->right != NULL)
+            add_el (el, tree->right);
 
-        return res;
+        else
+        {
+            tree->right = calloc (1, sizeof (node));
+
+            tree->right->data = el;
+        }
     }
 
-    for (j = 0; j < n; ++j)
-        if (p[0] == i[j])
-            break;
+    return 0;
+}
 
-    res->data = p[0];
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-    res->left  = make_tree (j, p + 1, i);
-    res->right = make_tree (n - j - 1, p + j + 1, i + j + 1);
+int tree_dest (node* tree)
+{
+    if (tree->left != NULL)
+        tree_dest (tree->left);
 
-    return res;
+    if (tree->right != NULL)
+        tree_dest (tree->right);
+
+    free (tree);
+
+    return 0;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -93,35 +104,34 @@ int print_top (node* t, int* n, int size)
 
 int main ()
 {
-    int n;
-    int* p = NULL;
-    int* i = NULL;
-    node* res = NULL;
-    int* top = calloc (1, sizeof (int));
+    int n = 0;
+    
     int tmp = 0;
+
+    node* res = calloc (1, sizeof (node));
 
     scanf ("%d", &n);
 
-    p = calloc (n, sizeof (int));
-    i = calloc (n, sizeof (int));
+    scanf ("%d", &tmp);
 
-    for (int j = 0; j < n; ++j)
-        scanf ("%d", p + j);
+    res->data = tmp;
 
-    for (int j = 0; j < n; ++j)
-        scanf ("%d", i + j);
+    for (int i = 1; i < n; ++i)
+    {
+        scanf ("%d", &tmp);
 
-    res = make_tree (n, p, i);
+        add_el (tmp, res);
+    }
 
-    printf ("%d\n", n);
+    printf ("%d ", n);
+
+    tmp = 0;
 
     print_top (res, &tmp, n);
 
-    printf ("\n");
-
     print_tree (res);
 
-    free (i);
-    free (p);
-    free (top);
+    tree_dest (res);
+        
+    return 0;
 }

@@ -6,11 +6,11 @@
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int con = 10;
-float eps = 0.0001;
+double eps = 0.0001;
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-float* gen_m (float* a, int n, float det)
+double* gen_m (double* a, int n, double det)
 {
     for (int i = 0; i < n; ++i)
         for (int j = 0; j < n; ++j)
@@ -27,7 +27,7 @@ float* gen_m (float* a, int n, float det)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-float* rand_m (float* a, int n)
+double* rand_m (double* a, int n)
 {
     int k = 0;
 
@@ -49,14 +49,14 @@ float* rand_m (float* a, int n)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-float print_m (float* a, int n)
+double print_m (double* a, int n)
 {
     printf ("\n");
 
     for (int i = 0; i < n; ++i)
     {
         for (int j = 0; j < n; ++j)
-            printf ("%lg ", a[i * n + j]);
+            printf ("\t%.3lg", a[i * n + j]);
 
         printf ("\n");
     }
@@ -68,15 +68,17 @@ float print_m (float* a, int n)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-float f_det (float* a, int n)
+double f_det (double* a, int n)
 {
     int k_m, j_m;
 
-    float max = fabs (a[0]);
+    int mul = 1;
 
-    float swap = 0;
+    double max = fabs (a[0]);
 
-    float res = 1;
+    double swap = 0;
+
+    double res = 1;
 
     for (int i = 0; i < n - 1; ++i)
     {
@@ -93,49 +95,61 @@ float f_det (float* a, int n)
                     k_m = k;
                 }
 
-        for (int j = 0; j < n; ++j)
-        {
-            swap = a[i * n + j];
-            a[i * n + j] = a[j_m * n + j];
-            a[j_m * n + j] = swap;
+        if (j_m != i)
+        {    
+            for (int j = 0; j < n; ++j)
+            {
+                swap = a[i * n + j];
+                a[i * n + j] = a[j_m * n + j];
+                a[j_m * n + j] = swap;
+            }
+
+            mul *= -1;
         }
 
-        for (int j = 0; j < n; ++j)
+        if (k_m != i)
         {
-            swap = a[j * n + i];
-            a[j * n + i] = a[j * n + k_m];
-            a[j * n + k_m] = swap;
+            for (int j = 0; j < n; ++j)
+            {
+                swap = a[j * n + i];
+                a[j * n + i] = a[j * n + k_m];
+                a[j * n + k_m] = swap;
+            }
+
+            mul *= -1;
         }
 
-        printf ("//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-        print_m (a, n);
+        // printf ("//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n%d\n", i);
+        // print_m (a, n);
 
-        if (abs (a[i * n + i]) < eps)
+        if (fabs (a[i * n + i]) < eps)
         {
+            // printf ("%lg\n", a[i * n + i]);
             return 0;
         }
 
         for (int j = i + 1; j < n; ++j)
         {
-            float coef = a[j * n + i] / a[i * n + i];
+            double coef = a[j * n + i] / a[i * n + i];
 
             for (int k = 0; k < n; ++k)
                 a[j * n + k] -= coef * a[i * n + k];
         }
 
-        print_m (a, n);
-        printf ("//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+        // print_m (a, n);
+        // printf ("//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
     }
 
     if (fabs (a[n * n - 1]) < eps)
     {
+        // printf ("%lg\n", a[n * n - 1]);
         return 0;
     }
 
     for (int i = 0; i < n; ++i)
         res *= a[i * n + i];
 
-    return res;
+    return mul * res;
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -144,28 +158,24 @@ int main ()
 {
     int n;
 
-    float* a = NULL;
+    double* a = NULL;
 
-    float res_det = 0;
+    double res_det = 0;
 
     srand (time (NULL));
 
     scanf ("%d", &n);
 
-    a = calloc (n * n, sizeof (float));
+    a = calloc (n * n, sizeof (double));
 
     for (int i = 0; i < n * n; ++i)
-        scanf ("%f", a + i);
-
-    // gen_m (a, n, det);
-
-    // rand_m (a, n);
+        scanf ("%lg", a + i);
 
     // print_m (a, n);
 
     res_det = f_det (a, n);
 
-    printf ("%lg\n", res_det);   
+    printf ("%lg\n", res_det);  
 
     free (a);
 }
