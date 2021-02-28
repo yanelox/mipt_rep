@@ -73,44 +73,10 @@ int hash_str (char* start, int len)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-int main ()
+cell** fill_table (char* text, int size_text)
 {
-    int exp_answ = 0;
-    int size_text = 0;  
-    int s_size_text = 0;
-    
-    char* text = NULL;
-    char* s_text = NULL;
-    char* go = NULL;
-
     cell** table = NULL;
-
-    scanf ("%d%d", &exp_answ, &size_text);
-
-    text = calloc (size_text + 1, sizeof (char));
-
-    scanf ("\n");
-
-    for (int i = 0; i < size_text; ++i)
-    {
-        scanf ("%c", text + i);
-    
-        if (text[i] == ' ')
-            text[i] = '\0';
-    }
-
-    scanf ("\n");
-    scanf ("%d", &s_size_text);
-    scanf ("\n");
-
-    s_text = calloc (s_size_text, sizeof (char));
-    for (int i = 0; i < s_size_text - 1; ++i)
-    {
-        scanf ("%c", s_text + i);
-
-        if (s_text[i] == ' ')
-            s_text[i] = '\0';
-    }
+    char* go = NULL;
 
     table = calloc (m, sizeof (cell*));
     for (int i = 0; i < m; ++i)
@@ -124,6 +90,8 @@ int main ()
     while (go < text + size_text)
     {
         int hash = hash_str (go, strlen (go));
+
+        // printf ("%d\n", hash);
 
         cell* tmp_cell = table[hash];
 
@@ -139,6 +107,8 @@ int main ()
                 tmp_cell->next = calloc (1, sizeof (cell));
 
                 tmp_cell->next->count = -1;
+
+                status = 1;
             }
 
             else if (strlen (tmp_cell->data) == strlen (go))
@@ -151,16 +121,160 @@ int main ()
                     }
 
                 if (!status)
-                    ++tmp_cell->count;
-
-                else
                 {
-                    status = 0;
-                    tmp_cell = tmp_cell->next;
+                    ++tmp_cell->count;
+                    status = 1;
                 }
             }
+
+            tmp_cell = tmp_cell->next;
         }
+
+        go += strlen (go) + 1;
     }
+
+    return table;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+char* get_text (int size)
+{
+    char* text = NULL;
+
+    text = calloc (size + 1, sizeof (char));
+
+    for (int i = 0; i < size; ++i)
+    {
+        scanf ("%c", text + i);
+
+        if (text[i] == ' ')
+            text[i] = '\0';
+    }
+
+    return text;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int print_text (char* text, int size)
+{
+    for (int i = 0; i < size; ++i)
+        if (text[i] != '\0')
+            printf ("%c", text[i]);
+        else
+            printf (" ");
+
+    printf ("\n");
+
+    return 0;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int* find_str (cell** table, int exp_answ, char* s_text, int size)
+{
+    int* res = calloc (exp_answ, sizeof (int));
+
+    char* go = s_text;
+
+    int hash = 0;
+
+    cell* tmp_cell = NULL;
+
+    for (int i = 0; i < exp_answ; ++i)
+    {
+        hash = hash_str (go, strlen (go));
+
+        tmp_cell = table[hash];
+
+        while (tmp_cell)
+        {
+            int status = 1;
+
+            if (tmp_cell->count == -1)
+            {
+                res[i] = 0;
+                tmp_cell = NULL;
+            }
+
+            else if (tmp_cell->count != -1)
+            {
+                if (strlen (tmp_cell->data) == strlen (go))
+                {
+                    for (int j = 0; j < strlen (go); ++j)
+                        if (tmp_cell->data[j] != go[j])
+                        {
+                            status = 0;
+                            break;
+                        }
+                
+
+                    if(status)
+                    {
+                        res[i] = tmp_cell->count;
+                        tmp_cell = NULL;
+                    }
+
+                    else
+                        tmp_cell = tmp_cell->next;
+                }
+
+                else
+                    tmp_cell = tmp_cell->next;
+            }
+        }
+
+        go += strlen (go) + 1;
+    }
+
+    return res;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int print_mass (int* mass, int size)
+{
+    for (int i = 0; i < size; ++i)
+        printf ("%d ", mass[i]);
+
+    printf ("\n");
+
+    return 0;
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int main ()
+{
+    int exp_answ = 0;
+    int size_text = 0;  
+    int s_size_text = 0;
+
+    int* answers = NULL;
+    
+    char* text = NULL;
+    char* s_text = NULL;
+    char* go = NULL;
+
+    cell** table = NULL;
+
+    scanf ("%d%d", &exp_answ, &size_text);
+    scanf ("\n");
+
+    text = get_text (size_text);
+
+    scanf ("\n");
+    scanf ("%d", &s_size_text);
+    scanf ("\n");
+
+    s_text = get_text (s_size_text);
+    
+    table = fill_table (text, size_text);
+
+    answers = find_str (table, exp_answ, s_text, s_size_text);
+
+    print_mass (answers, exp_answ);
 
     for (int i = 0; i < m; ++i)
         free (table[i]);
@@ -168,4 +282,5 @@ int main ()
     free (table);
     free (text);
     free (s_text);
+    free (answers);
 }
