@@ -162,8 +162,6 @@ int main ()
 
     double res_det = 0;
 
-    srand (time (NULL));
-
     scanf ("%d", &n);
 
     a = calloc (n * n, sizeof (double));
@@ -173,9 +171,9 @@ int main ()
 
     // print_m (a, n);
 
-    res_det = f_det (a, n);
+    // res_det = f_det (a, n);
 
-    printf ("%lg\n", res_det);  
+    // printf ("%lg\n", res_det);  
 
     free (a);
 }
