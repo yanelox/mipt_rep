@@ -31,7 +31,7 @@ d_list* DListCtor (int data)
 
     return res;
 }
-
+//ugu
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 void DListDtor (d_list* list)
