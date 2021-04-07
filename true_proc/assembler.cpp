@@ -9,9 +9,9 @@
 
 typedef struct
 {
-    string label_name;
+    string label_name = {0, nullptr};
 
-    long int pointer;
+    long int pointer = 0;
 
 } label;
 
@@ -29,18 +29,21 @@ typedef struct
 
 Command commands[] =
 {
-    {{2, (char*) "in"},     0x22},
-    {{4, (char*) "push"},   0x24},
-    {{3, (char*) "mul"},    0x27},
-    {{3, (char*) "add"},    0x29},
-    {{3, (char*) "sub"},    0x42},
-    {{3, (char*) "div"},    0x44},
-    {{3, (char*) "out"},    0x47},
-    {{3, (char*) "jmp"},    0x49},
-    {{3, (char*) "hlt"},    0x99}
+    {{2, (char*) "in"},     0x11},
+    {{4, (char*) "push"},   0x12},
+    {{3, (char*) "mul"},    0x13},
+    {{3, (char*) "add"},    0x14},
+    {{3, (char*) "sub"},    0x15},
+    {{3, (char*) "div"},    0x16},
+    {{3, (char*) "out"},    0x17},
+    {{3, (char*) "jmp"},    0x18},
+    {{3, (char*) "sin"},    0x19},
+    {{3, (char*) "cos"},    0x20},
+    {{4, (char*) "sqrt"},   0x21},
+    {{3, (char*) "hlt"},    0x99}       //TODO: add conditional jumps (ja >), (jae >=), (jb <), (jbe <=), (je ==), (jne !=)
 };
 
-const size_t number_commands = 9;
+const size_t number_commands = 9; //TODO: dump (print log), 
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -118,7 +121,7 @@ int main (int argc, char* argv[])
     long int count_sym = 0;
     long int count_str = 0;
 
-    string* pointers_to_str = (string*) calloc (count_str, sizeof (string)); 
+    string* pointers_to_str = NULL; 
 
     count_sym = CountSymbols (assm_file);
 
@@ -144,31 +147,29 @@ int main (int argc, char* argv[])
 
     count_str = CountStr (code_copy);
 
+    pointers_to_str = (string*) calloc (count_str, sizeof (string));
+
     FillPMassive (pointers_to_str, code_copy, count_str, count_sym);
 
-    // label* labels = (label*)  calloc (1, sizeof (label));
+    label* labels = (label*)  calloc (1, sizeof (label));
 
-    // long int label_count = 0;
+    long int label_count = 0;
 
-    // labels[0].label_name.start = NULL;
-    // labels[0].label_name.len   = 0;
-    // labels[0].pointer          = 0;
+    printf ("First step starting:\n");
 
-    // Assembling (pointers_to_str, count_str, code_file, &labels, &label_count);
-    // Assembling (pointers_to_str, count_str, code_file, &labels, &label_count);
+    Assembling (pointers_to_str, count_str, code_file, &labels, &label_count);
 
-    // FILE* f = fopen (code_file, "wb");
-    // printf ("%p\n", f);
-    // fclose (f);
+    printf ("First step succesfully completed.\nSecond step starting:\n");
 
-    PrintStr (pointers_to_str, count_str);
-    printf ("%u\n", pointers_to_str[1].len);
+    Assembling (pointers_to_str, count_str, code_file, &labels, &label_count);
+    
+    printf ("Second step succesfully completed.\n");
 
-    // printf ("Assembling succesfull\n");
+    printf ("Assembling succesfull\n");
 
-    // free (code_copy);
-    // free (pointers_to_str);
-    // LabelFree (labels, label_count);
+    free (code_copy);
+    free (pointers_to_str);
+    LabelFree (labels, label_count);
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -184,55 +185,51 @@ void Assembling (string* str, long int count_str, char* code_file, label** label
     double ret_v = -1;
 
     FILE* f = fopen (code_file, "wb");
+    FILE* log_file = fopen ("log.txt", "w");
 
-    printf ("%p\n", f);
+    if (f == NULL)
+    {
+        assm_exit_code = ASSM_ASSEMBLING_CODE + ASSM_ALLOCATION_ERROR;
+        return;
+    }
 
-    // if (f == NULL)
-    // {
-    //     assm_exit_code = ASSM_ASSEMBLING_CODE + ASSM_ALLOCATION_ERROR;
-    //     return;
-    // }
+    for (long int i = 0; i < count_str; ++i)
+    {
+        ret_v = -1;
+        res = -1;
 
-    // for (long int i = 0; i < count_str; ++i)
-    // {
-    //     ret_v = -1;
-    //     res = -1;
+        res = Decrypt_Input (str[i], labels, label_count, &ret_v, i);
 
-    //     printf ("%ld 1\n", i);
+        if (res == -1)
+        {
+            break;
+        }
 
-    //     // res = Decrypt_Input (str[i], labels, label_count, &ret_v, i);
+        if (res / 256 * 256 == ASSM_COMMAND_CODE)
+        {
+            int half_res = res % 256;
 
-    //     if (res == -1)
-    //     {
-    //         break;
-    //     }
+            if (half_res == commands[1].code)
+            {
+                fwrite (&half_res, sizeof (int), 1, f);
+                fwrite (&ret_v, sizeof (double), 1, f);
+            }
 
-    //     if (res / 256 * 256 == ASSM_COMMAND_CODE)
-    //     {
-    //         int half_res = res % 256;
-
-    //         if (half_res == commands[1].code) //push code
-    //         {
-    //             fwrite (&half_res, sizeof (int), 1, f);
-    //             fwrite (&ret_v, sizeof (double), 1, f);
-    //         }
-
-    //         else if (half_res == commands[7].code)
-    //         {
-    //             if (ret_v != -1)
-    //                 i = ret_v - 1;
-    //         }
+            else if (half_res == commands[7].code)
+            {
+                if (ret_v != -1)
+                    i = (int) ret_v - 1;
+            }
             
-    //         else
-    //         {
-    //             fwrite (&half_res, sizeof (int), 1, f);
-    //         }
-    //     }
-
-    //     printf ("%ld 2\n", i);
-    // }
+            else
+            {
+                fwrite (&half_res, sizeof (int), 1, f);
+            }
+        }
+    }
 
     fclose (f);
+    fclose (log_file);
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -246,6 +243,7 @@ int Decrypt_Input (string str, label** labels, long int* label_count, double* re
     assert (ret_v);
 
     char delim[] = " \n";
+    char spec_delim[] = " \n:";
 
     char* lexem = strtok (str.start, delim);
 
@@ -259,7 +257,7 @@ int Decrypt_Input (string str, label** labels, long int* label_count, double* re
 
         *labels = (label*) realloc (*labels, sizeof (label) * (*label_count + 1));
 
-        (*labels)[*label_count - 1].label_name = StrCtor (first_part.len, first_part.start + 1);
+        (*labels)[*label_count - 1].label_name = StrCtor (first_part.len - 1, first_part.start + 1);
         (*labels)[*label_count - 1].pointer    = cur_p;
 
         return ASSM_LABEL_CODE;
@@ -280,9 +278,9 @@ int Decrypt_Input (string str, label** labels, long int* label_count, double* re
         return -1;
     }
 
-    if (num == 1) //push code
+    if (num == 1) //push code  
     {
-        int res = sscanf (str.start + first_part.len + 1, "%lf", ret_v);
+        int res = sscanf (str.start + first_part.len + 1, "%lf", ret_v); //TODO: process the case with push from register
 
         if (res != 1)
         {
@@ -290,22 +288,22 @@ int Decrypt_Input (string str, label** labels, long int* label_count, double* re
             return -1;
         }
     }
-
+    //TODO: add pope-code (with pop to register)
     if (num == 7)   //jmp code
     {
-        lexem = strtok (str.start + first_part.len + 1, delim);
+        lexem = strtok (str.start + first_part.len + 1, spec_delim);
 
         string second_part = StrCtor (strlen (lexem), lexem);
-
+        
         for (long int i = 0; i < *label_count; ++i)
         {
-            if (!StrCompare (&second_part, &(commands[i].text)))
+            if (!StrCompare (&second_part, &labels[i]->label_name))
             {
-                *ret_v = i;
+                *ret_v = labels[i]->pointer;
                 break;
             }
         }
-
+        
         StrDtor (second_part);
     }
 
@@ -318,7 +316,7 @@ int Decrypt_Input (string str, label** labels, long int* label_count, double* re
 
 void Assm_PrintExitCode ()
 {
-    int error_code  = assm_exit_code % 100;
+    int error_code  = assm_exit_code % 100; 
     int func_code   = assm_exit_code / 100 * 100;
 
     int no_error_status = 0;

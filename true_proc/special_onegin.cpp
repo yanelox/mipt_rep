@@ -217,11 +217,6 @@ int StrCompare (const void* s1, const void* s2)
     string* str1 = (string*) s1;
     string* str2 = (string*) s2;
 
-    if ((*str1).len == 1)
-        return 1;
-    if ((*str2).len == 1)
-        return -1; 
-
     int i = 0, j = 0;
     char cur_sym1 = '0', cur_sym2 = '0';
 
