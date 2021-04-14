@@ -15,7 +15,7 @@ typedef struct
 
 } label;
 
-//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  
 
 typedef struct
 {
@@ -30,20 +30,22 @@ typedef struct
 Command commands[] =
 {
     {{2, (char*) "in"},     0x11},
-    {{4, (char*) "push"},   0x12},
-    {{3, (char*) "mul"},    0x13},
-    {{3, (char*) "add"},    0x14},
-    {{3, (char*) "sub"},    0x15},
-    {{3, (char*) "div"},    0x16},
-    {{3, (char*) "out"},    0x17},
-    {{3, (char*) "jmp"},    0x18},
-    {{3, (char*) "sin"},    0x19},
-    {{3, (char*) "cos"},    0x20},
-    {{4, (char*) "sqrt"},   0x21},
+    {{4, (char*) "push"},   0x12},  // push from input
+    {{4, (char*) "push"},   0x13},  // push from register
+    {{3, (char*) "pop"},    0x14},  // pop to register
+    {{3, (char*) "mul"},    0x16},
+    {{3, (char*) "add"},    0x17},
+    {{3, (char*) "sub"},    0x18},
+    {{3, (char*) "div"},    0x19},
+    {{3, (char*) "out"},    0x20},
+    {{3, (char*) "jmp"},    0x21},
+    {{3, (char*) "sin"},    0x22},
+    {{3, (char*) "cos"},    0x23},
+    {{4, (char*) "sqrt"},   0x24},
     {{3, (char*) "hlt"},    0x99}       //TODO: add conditional jumps (ja >), (jae >=), (jb <), (jbe <=), (je ==), (jne !=)
 };
 
-const size_t number_commands = 9; //TODO: dump (print log), 
+const size_t number_commands = 14; //TODO: dump (print log), 
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
@@ -272,39 +274,69 @@ int Decrypt_Input (string str, label** labels, long int* label_count, double* re
         }
     }
 
-    if (num == -1)
+    switch (num)
     {
-        assm_exit_code = ASSM_DECRYPTINPUT_CODE + ASSM_INPUT_EXCEPTION;
-        return -1;
-    }
-
-    if (num == 1) //push code  
-    {
-        int res = sscanf (str.start + first_part.len + 1, "%lf", ret_v); //TODO: process the case with push from register
-
-        if (res != 1)
+        case -1:
         {
             assm_exit_code = ASSM_DECRYPTINPUT_CODE + ASSM_INPUT_EXCEPTION;
             return -1;
+            break;
         }
-    }
-    //TODO: add pope-code (with pop to register)
-    if (num == 7)   //jmp code
-    {
-        lexem = strtok (str.start + first_part.len + 1, spec_delim);
 
-        string second_part = StrCtor (strlen (lexem), lexem);
-        
-        for (long int i = 0; i < *label_count; ++i)
+        case 1:
         {
-            if (!StrCompare (&second_part, &labels[i]->label_name))
+            lexem = strtok (str.start + first_part.len + 1, delim);
+
+            string second_part = StrCtor (strlen(lexem), lexem);
+
+            int counter = 0;
+
+            for (int i = 0; i < strlen(lexem); ++i)
             {
-                *ret_v = labels[i]->pointer;
+                if (!isdigit (lexem[i]))
+                {
+                    counter = -1;
+                    break;
+                }
+            }
+
+            if (counter == 0)
+            {               
+                int res = sscanf (str.start + first_part.len + 1, "%lf", ret_v); //TODO: process the case with push from register
+
+                if (res != 1)
+                {
+                    assm_exit_code = ASSM_DECRYPTINPUT_CODE + ASSM_INPUT_EXCEPTION;
+                    return -1;
+                }
                 break;
             }
+
+            else
+            {
+            ;
+            }
         }
-        
-        StrDtor (second_part);
+        //TODO: add pope-code (with pop to register)
+
+        case 7:
+        {
+            lexem = strtok (str.start + first_part.len + 1, spec_delim);
+
+            string second_part = StrCtor (strlen (lexem), lexem);
+            
+            for (long int i = 0; i < *label_count; ++i)
+            {
+                if (!StrCompare (&second_part, &labels[i]->label_name))
+                {
+                    *ret_v = labels[i]->pointer;
+                    break;
+                }
+            }
+            
+            StrDtor (second_part);
+            break;
+        }
     }
 
     strcat (str.start, first_part.start + first_part.len + 1);

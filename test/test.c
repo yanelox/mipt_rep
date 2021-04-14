@@ -1,9 +1,8 @@
  #include <stdio.h>
 
- int fact (int x)
- {
-     if (x < 2)
-        return x;
+int fool (int x)
+{
+    return x;
+}
 
-    return x * fact (x - 1);
- }
+int foo2 (int x, int y)
