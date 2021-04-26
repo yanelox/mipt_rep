@@ -1,3 +1,4 @@
+#pragma once
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 /*!
@@ -258,10 +259,12 @@ int LettersCmp          (char a, char b);
 /*!
     \brief  Function which print info about exception using exception code 
             which stored in onegin_exit_code variabe
+
+    @param  [in] file_name Name of file where you want to save log info or NULL if you
+                           want to get it in console 
 */
 
-void Onegin_PrintExitCode   ();
-
+void Onegin_PrintExitCode   (char* file_name);
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 void StrDtor                (string str);

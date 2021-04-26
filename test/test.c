@@ -1,8 +1,6 @@
  #include <stdio.h>
 
-int fool (int x)
+int main ()
 {
-    return x;
+    printf("%d %d\n", 'a', 'A');
 }
-
-int foo2 (int x, int y)

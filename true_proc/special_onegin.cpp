@@ -387,36 +387,54 @@ int LettersCmp (char a, char b)
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-void Onegin_PrintExitCode ()
+void Onegin_PrintExitCode (char* file_name)
 {
+    FILE* log = NULL;
+    int flag = 0;
+
+    if (file_name == NULL)
+    {
+        log = stdout;
+        flag = 1;
+    }
+
+    else if (strlen(file_name) == 2 and file_name[0] == '-' and file_name[1] == 'c')
+    {
+        log = stdout;
+        flag = 1;
+    }
+
+    else
+        log = fopen(file_name, "w");
+
     int tmp = onegin_exit_code % 256;
 
     if (tmp == NO_EXCEPTIONS_ONEGIN)
     {
-        printf ("No exceptions\n");
+        fprintf (log, "No exceptions\n");
         return;
     }
 
     switch (tmp)
     {
         case ONEGIN_FILE_OPEN_ERROR:
-            printf ("Failed to open file in ");
+            fprintf (log, "Failed to open file in ");
             break;
 
         case ONEGIN_FILE_CLOSE_ERROR:
-            printf ("Failed to close file in ");
+            fprintf (log, "Failed to close file in ");
             break;
 
         case ONEGIN_FREAD_ERROR:
-            printf ("fread() returns incorrect value in ");
+            fprintf (log, "fread() returns incorrect value in ");
             break;
 
         case ONEGIN_FSEEK_ERROR:
-            printf ("fseek() returns incorrect value in ");
+            fprintf (log, "fseek() returns incorrect value in ");
             break;
 
         default:
-            printf ("Unknown exception code in ");
+            fprintf (log, "Unknown exception code in ");
             break;
     }
 
@@ -425,59 +443,62 @@ void Onegin_PrintExitCode ()
     switch (tmp)
     {
         case CountSymbols_CODE:
-            printf ("CountSymblos() ");
+            fprintf (log, "CountSymblos() ");
             break;
 
         case CountStr_CODE:
-            printf ("CountStr() ");
+            fprintf (log, "CountStr() ");
             break;
 
         case FromFileToStr_CODE:
-            printf ("FromFileToStr() ");
+            fprintf (log, "FromFileToStr() ");
             break;
 
         case FromStrToFile_CODE:
-            printf ("FromStrToFile() ");
+            fprintf (log, "FromStrToFile() ");
             break;
 
         case init_CODE:
-            printf ("init() ");
+            fprintf (log, "init() ");
             break;
 
         case FillPMassive_CODE:
-            printf ("FillPMassive() ");
+            fprintf (log, "FillPMassive() ");
             break;
 
         case PrintStr_CODE:
-            printf ("PrintStr() ");
+            fprintf (log, "PrintStr() ");
             break;
 
         case StrCompare_CODE:
-            printf ("StrCompare() ");
+            fprintf (log, "StrCompare() ");
             break;
 
         case StrRevCompare_CODE:
-            printf ("StrRevCompare() ");
+            fprintf (log, "StrRevCompare() ");
             break;
 
         case QuickSort_CODE:
-            printf ("QuickSort() ");
+            fprintf (log, "QuickSort() ");
             break;
 
         case JSwap_CODE:
-            printf ("JSwap() ");
+            fprintf (log, "JSwap() ");
             break;
 
         case OrigStrToFile_CODE:
-            printf ("OrigStrToFile() ");
+            fprintf (log, "OrigStrToFile() ");
             break;
         
         default:
-            printf ("unknown ");
+            fprintf (log, "unknown ");
             break;
     }
 
-    printf ("func\n");
+    fprintf (log, "func\n");
+
+    if (!flag)
+        fclose(log);
 }
 
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
