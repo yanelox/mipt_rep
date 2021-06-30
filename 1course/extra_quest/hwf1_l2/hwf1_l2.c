@@ -48,51 +48,84 @@ int** perm (int n, int* m, int* a, int k, int** res, int* size)
     return res;
 }
 
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+void delete_repet (int **res, int size, int n)
+{       
+    assert (res);
+
+    int *tmp1, *tmp2, *tmp3;
+
+    tmp1 = calloc (2 * n, sizeof (int));
+    tmp2 = calloc (2 * n, sizeof (int));
+    tmp3 = calloc (n,     sizeof (int));
+
+
+    for (int i = 0; i < size; ++i)
+    if (res[i])
+    {
+        patpreproc (res[i], tmp3, n);
+
+        for (int j = i + 1; j < size; ++j)
+            if (res[j])
+            {
+                for (int k = 0; k < n; ++k)
+                {
+                    tmp1[k]              = res[j][k];
+                    tmp1[n + k]          = res[j][k];
+                    tmp2[2 * n - 1 - k]  = res[j][k];
+                    tmp2[n - 1 - k]      = res[j][k];
+                }
+
+                if (strstrci (res[i], tmp3, tmp1, n, 2 * n) ||
+                    strstrci (res[i], tmp3, tmp2, n, 2 * n))
+                {
+                    free (res[j]);
+                    res[j] = NULL;
+                }
+            }
+    }
+
+    free (tmp1);
+    free (tmp2);
+    free (tmp3);
+}
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+int ** start_perm (int n, int *size)
+{
+    int **res;
+    int *mass, *a;
+
+    mass = calloc (2 * n, sizeof (int));
+    a    = calloc (2 * n, sizeof (int));
+    res  = calloc (1,     sizeof (int*));
+
+    res = perm (2 * n, mass, a, 0, res, size);
+
+    free (mass);
+    free (a);
+
+    return res;
+}
+
 //flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 int main()
 {
     int n = 0;
 
-    int *mass, *a;
-
     int size = 1;
 
     int **res;
 
-    int *tmp1 = calloc (2 * n, sizeof (int)), 
-        *tmp2 = calloc (2 * n, sizeof (int)),
-        *tmp3 = calloc (n, sizeof (int));
-
     assert (scanf ("%d", &n) == 1);
 
-    mass = calloc (2 * n, sizeof (int));
-    a    = calloc (2 * n, sizeof (int));
-    res  = calloc (1,     sizeof (int*));
+    res = start_perm (n, &size);
 
-    res = perm (2 * n, mass, a, 0, res, &size);
-
-
-    // for (int i = 0; i < size; ++i)
-    //     if (res[i])
-    //     {
-    //         patpreproc (res[i], tmp3, n);
-
-    //         for (int j = i + 1; j < size; ++j)
-    //             if (res[j])
-    //             {
-    //                 for (int k = 0; k < n; ++k)
-    //                     tmp1[k] = tmp1[n + k] = tmp2[2 * n - 1 - k] = tmp2[n - 1 - k] = res[j][k];
-                    
-    //                 if (strstrci (res[i], tmp3, tmp1, n, 2 * n) ||
-    //                     strstrci (res[i], tmp3, tmp2, n, 2 * n))
-    //                 {
-    //                     free (res[j]);
-    //                     res[j] = NULL;
-    //                 }
-    //             }
-    //     }
-
+    delete_repet (res, size, n);
 
     for (int j = 0; j < size - 1; ++j)
         if (res[j])
@@ -108,9 +141,4 @@ int main()
             free (res[i]);
 
     free (res);
-    free (mass);
-    free (a);
-    free (tmp1);
-    free (tmp2);
-    free (tmp3);
 }

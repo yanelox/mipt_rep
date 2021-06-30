@@ -8,6 +8,10 @@
 
 int** perm (int n, int* m, int* a, int k, int** res, int* size);
 
+void delete_repet (int **res, int size, int n);
+
+//flexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 int mass_compare (int* s1, int* s2, int len);
 
 void patpreproc(int* needle, int* needle_lps, int len);
