@@ -84,17 +84,9 @@ int main ()
 
     int sem_key = my_sem_get (ftok_id, 1, IPC_CREAT | 0666);
 
-    int val1;
-
-    struct sembuf cm = {0, 1, 0};
-
-    my_semctl (sem_key, 0, MY_SETVAl, val1);
-
-    scanf ("%d", &val1);
+    struct sembuf cm = {0, -1, 0};
 
     my_semop (sem_key, &cm, 1);
 
-    // printf ("%d\n", my_semctl (sem_key, 0, MY_GETVAL, 0));
-
-    // printf ("%d\n", my_semctl (sem_key, 0, MY_GETVAL, 0));
+    printf ("jopa\n");
 }
