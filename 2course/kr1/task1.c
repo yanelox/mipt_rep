@@ -45,14 +45,11 @@ int main (int argc, char* argv[])
 
             sprintf (msg.mtext, "Hello %d!\n", j);
             
-
             msgsnd (msg_key, &msg, 256, 0);
         }
 
         for (int j = 1; j < n; ++j)
-        {
             msgrcv (msg_key, &msg, 256, n + 1, 0);   
-        }
     }
     
     else
