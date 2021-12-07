@@ -8,8 +8,14 @@
 
 int main ()
 {
-    char msg1[] = "Hello, world1!";
-    char msg2[] = "Hello, world2!";
+    char msg1[1024];
+    char msg2[1024];
+
+    memset (msg1, '\0', 1024);
+    memset (msg2, '\0', 1024);
+
+    sprintf (msg1, "Hello, world1!");
+    sprintf (msg2, "Hello, world2!");
 
     int tcp_socket = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -35,6 +41,6 @@ int main ()
     dest.sin_port = htons (27000);
     dest.sin_addr.s_addr = htonl (INADDR_LOOPBACK);
 
-    sendto (tcp_socket, msg1, 14, 0, (struct sockaddr*) &dest, sizeof (dest));
-    sendto (tcp_socket, msg2, 14, 0, (struct sockaddr*) &dest, sizeof (dest));
+    sendto (tcp_socket, msg1, 1024, 0, (struct sockaddr*) &dest, sizeof (dest));
+    // sendto (tcp_socket, msg2, 1024, 0, (struct sockaddr*) &dest, sizeof (dest));
 }

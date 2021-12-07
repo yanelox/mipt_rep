@@ -63,7 +63,7 @@ int main ()
     }
 
     char buffer[1024];
-    buffer[1023] = '\0';
+    memset (buffer, '\0', 1024);
 
     int bytes_recv = recv(com_socket, buffer, 1024, 0);
     if(bytes_recv == -1)
@@ -74,12 +74,12 @@ int main ()
 
     printf ("%s\n", buffer);
 
-    int symnum = sendall(com_socket, buffer, bytes_recv, 0);
-    if(symnum == -1)
-    {
-        perror ("");
-        return 0;
-    }
+    // int symnum = sendall(com_socket, buffer, 1024, 0);
+    // if(symnum == -1)
+    // {
+    //     perror ("");
+    //     return 0;
+    // }
 
     close (com_socket);
     close (tcp_socket);

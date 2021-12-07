@@ -41,18 +41,27 @@ int main ()
 
     char message[1024];
     char buffer[1024];
-    buffer[1023] = '\0';
+
+    memset (buffer, '\0', 1024);
+    memset (message, '\0', 1024);
 
     scanf ("%s", message);
+    // printf ("%s\n", message);
 
-    int symnum = sendall(tcp_socket, message, sizeof(message), 0);
+    int symnum = sendall(tcp_socket, message, 1024, 0);
     if(symnum == -1)
     {
         perror ("");
         return 0;
     }
 
-    recv(tcp_socket, buffer, sizeof(message), 0);
+    if (recv(tcp_socket, buffer, 1024, 0) == -1)
+    {
+        perror("");
+        return 0;
+    }
 
     printf("%s\n", buffer);
+
+    close (tcp_socket);
 }   
