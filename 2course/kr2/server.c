@@ -21,7 +21,7 @@ struct server_info
     int com_socket[1024];
     int number;
     int fid[1024];
-    int fid1[1024];
+    unsigned int client_ip[1024];
 };
 
 struct message 
@@ -108,6 +108,8 @@ int main (int argc, char* argv[])
     
     struct server_info *info = shmat (shm_index, NULL, 0);
 
+    memset (info, 0, sizeof (struct server_info));
+
     info->number = 1;
 
     int fid1 = fork ();
@@ -130,6 +132,8 @@ int main (int argc, char* argv[])
             {
                 printf ("Succesfully connected client %d. socket: %d\n", info->number, info->com_socket[info->number]);
                 // printf ("%d\n", info->number);
+
+                info->client_ip[info->number] = info->client_addr->sin_addr.s_addr;
                 
                 cur_number = info->number;
                 
@@ -152,20 +156,25 @@ int main (int argc, char* argv[])
     else
     {
         char s[1024];
-        memset (s, '\0', 1024);
     
-        while (strncmp ("$close", s, 6))
+        while (1)
         {
             memset (s, '\0', 1024);
             scanf ("%s", s);
+
+            if (strncmp ("$close", s, 6) == 0)
+                break;
+
+            else if (strncmp ("$get", s, 4) == 0)
+            {
+                for (int i = 1; i < info->number; ++i)
+                    printf ("Client %d have adress %u\n", i, info->client_ip[i]);
+            }
         }
 
         kill (fid1, SIGKILL);
         for (int i = 1; i < info->number; ++i)
-        {
             kill (info->fid[i], SIGKILL);
-            kill (info->fid1[i], SIGKILL);
-        }
 
         printf ("Support process killed\n");
 
@@ -179,65 +188,38 @@ int main (int argc, char* argv[])
     if (cfid == 0)
     {
         char buffer[1024];
-        char send_buffer[2048];
-        
-        memset (send_buffer, '\0', 2048);
 
         int ret_value = 0;
         int tmp = 0;
 
-        int client_fid = fork ();
-
-        if (client_fid)
+        while (1)
         {
-            info->fid1[cur_number] = client_fid;
+            memset (buffer, '\0', 1024);
 
-            while (1)
+            ret_value = recv (info->com_socket[cur_number], buffer, 1024, 0);
+
+            if (ret_value != -1 && ret_value != 0)
             {
-                memset (buffer, '\0', 1024);
-
-                ret_value = recv (info->com_socket[cur_number], buffer, 1024, 0);
-
-                if (ret_value != -1 && ret_value != 0)
+                if (strncmp (buffer, "$get", 4) == 0)
                 {
-                    sprintf (send_buffer, "Message from client %d: \"%s\"\n", cur_number, buffer);
-                    printf ("%s", send_buffer);
+                    printf ("Client %d asked for adresses\n", cur_number);
 
-                    strncpy (msg.mtext, send_buffer, 2048);
+                    info->client_ip[0] = info->number;
 
-                    for (int i = 1; i < info->number; ++i)
-                        if (i != cur_number)
-                        {
-                            msg.mtype = i;
-
-                            msgsnd (msg_key, &msg, msize, 0);
-                        }
-
-                    memset (send_buffer, '\0', 2048);
-                }
-
-                else if (ret_value != 0)
-                {
-                    perror ("recv");
-                    printf ("Socket is %d, client number is %d\n", info->com_socket[cur_number], cur_number);
-                }
-
-                else
-                {
-                    printf ("Client %d is disconnected\n", cur_number);
-                    break;
+                    sendall (info->com_socket[cur_number], (char*) info->client_ip, 1024 * sizeof (unsigned int), 0);
                 }
             }
-        }
 
-        else
-        {
-            while (1)
+            else if (ret_value == 0)
             {
-                msgrcv (msg_key, &msg, msize, cur_number, 0);
-
-                sendall (info->com_socket[cur_number], msg.mtext, 2048, 0);
+                printf ("Client %d is disconnected\n", cur_number);
+                info->client_ip[cur_number] = 0;
+                return 0;
             }
+
+            else
+                perror ("recv");
         }
+        
     }
 }
