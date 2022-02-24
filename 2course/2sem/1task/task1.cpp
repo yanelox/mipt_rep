@@ -30,7 +30,7 @@ namespace math
         return res;
     }
 
-    std::istream & operator >> (std::istream  &in, vector &vec)
+    std::istream & operator >> (std::istream &in, vector &vec)
     {
         in >> vec.x[0] >> vec.x[1] >> vec.x[2];
 
