@@ -2,5 +2,7 @@
 !*/
 !*.c*
 !*.h
+!*.py
+!*.pyc
 !/2course/project/python_script/*
 /2course/project/build/*
